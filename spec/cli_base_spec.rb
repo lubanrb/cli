@@ -36,6 +36,14 @@ class TestCLIBaseWithHelp < TestCLIBase
   def show_version; @version; end
 end
 
+class TestCLIBaseWithCommands < TestCLIBaseWithAction
+  command :create do
+    option :project, "project name"
+    argument :manager, "project manager"
+    action :process_options
+  end
+end
+
 def create_cli_base(klass = TestCLIBase, starter_method = :run, &config_blk)
   klass.new(starter_method, &config_blk)
 end
@@ -316,5 +324,18 @@ describe Luban::CLI::Base do
     cli.manager.must_equal "John Smith"
     cli.arguments[:manager].value.must_equal "John Smith"
     cli.result[:args][:manager].must_equal "John Smith"
+  end
+
+  it "supports subcommands" do
+    cli = create_cli_base(TestCLIBaseWithCommands)
+    cli.respond_to?(:create).must_equal true
+    assert_raises(SystemExit) { cli.run }
+    cli.reset
+    assert_silent { cli.run(["create", "John Smith"]) }
+    cli.manager.must_equal "John Smith"
+    cli.reset
+    assert_silent { cli.run(["create", "--project", "test project", "John Smith"]) }
+    cli.project.must_equal "test project"
+    cli.manager.must_equal "John Smith"
   end
 end

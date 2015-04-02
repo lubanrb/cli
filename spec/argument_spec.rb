@@ -160,11 +160,11 @@ describe Luban::CLI::Argument do
 
   it "validates required value" do
     arg = create_argument(required: true)
-    arg.valid?(nil).must_equal false
-    assert_raises(Luban::CLI::Argument::MissingRequiredArgument) { arg.value = nil }
+    arg.valid?.must_equal false
+    arg.missing?.must_equal true
     arg = create_argument(required: false)
-    arg.valid?(nil).must_equal true
-    assert_silent { arg.value = nil }
+    arg.valid?.must_equal true
+    arg.missing?.must_equal false
   end
 
   it "validates value matching" do

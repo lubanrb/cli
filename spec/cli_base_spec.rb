@@ -1,8 +1,8 @@
 require_relative 'spec_helper'
 
 class TestCLIBase < Luban::CLI::Base
-  def self.create(starter_method = :run, &config_blk)
-    new(self, starter_method, &config_blk)
+  def initialize(starter_method = :run, &config_blk)
+    super(self, starter_method, &config_blk)
   end
 end
 
@@ -12,12 +12,23 @@ end
 
 class TestCLIBaseWithAction < TestCLIBase
   attr_reader :project
+  attr_reader :manager
+
+  def reset
+    super
+    @project = nil
+    @manager = nil
+  end
 
   protected
 
   def process_options(cmd:, argv:, args:, opts:)
     @project = opts[:project]
+    @manager = args[:manager]
   end
+
+  def show_help; true; end
+  def show_error(error); true; end
 end
 
 class TestCLIBaseWithHelp < TestCLIBase
@@ -26,7 +37,7 @@ class TestCLIBaseWithHelp < TestCLIBase
 end
 
 def create_cli_base(klass = TestCLIBase, starter_method = :run, &config_blk)
-  klass.create(starter_method, &config_blk)
+  klass.new(starter_method, &config_blk)
 end
 
 describe Luban::CLI::Base do
@@ -239,14 +250,71 @@ describe Luban::CLI::Base do
     argv = ["--project", "test project", "John Smith"]
     cli.run(argv)
     cli.project.must_equal "test project"
+    cli.manager.must_equal "John Smith"
     cli.options[:project].value.must_equal "test project"
     cli.arguments[:manager].value.must_equal "John Smith"
     cli.result[:opts][:project].must_equal "test project"
     cli.result[:args][:manager].must_equal "John Smith"
     cli.reset
+    cli.project.must_equal nil
+    cli.manager.must_equal nil
     cli.options[:project].value.must_equal nil
     cli.arguments[:manager].value.must_equal nil
     cli.result[:opts][:project].must_equal nil
     cli.result[:args][:manager].must_equal nil
+  end
+
+  it "validates required options" do
+    cli = create_cli_base(TestCLIBaseWithAction) do
+            option :project, "project name"
+            action!(:process_options)
+          end
+    cli.options[:project].required?.must_equal false
+    argv = []
+    assert_silent { cli.run(argv) }
+    cli.project.must_be_nil
+    cli.options[:project].value.must_be_nil
+    cli.result[:opts][:project].must_be_nil
+
+    cli = create_cli_base(TestCLIBaseWithAction) do
+            option :project, "project name", required: true
+            action!(:process_options)
+          end
+    cli.options[:project].required?.must_equal true
+    argv = []
+    assert_raises(SystemExit) { cli.run(argv) }
+    cli.reset
+    argv = ["--project", "test project"]
+    assert_silent {cli.run(argv) }
+    cli.project.must_equal "test project"
+    cli.options[:project].value.must_equal "test project"
+    cli.result[:opts][:project].must_equal "test project"
+  end
+
+  it "validates required arguments" do
+    cli = create_cli_base(TestCLIBaseWithAction) do
+            argument :manager, "project manager", required: false
+            action!(:process_options)
+          end
+    cli.arguments[:manager].required?.must_equal false
+    argv = []
+    assert_silent { cli.run(argv) }
+    cli.manager.must_be_nil
+    cli.arguments[:manager].value.must_be_nil
+    cli.result[:args][:manager].must_be_nil
+
+    cli = create_cli_base(TestCLIBaseWithAction) do
+            argument :manager, "project manager"
+            action!(:process_options)
+          end
+    cli.arguments[:manager].required?.must_equal true
+    argv = []
+    assert_raises(SystemExit) { cli.run(argv) }
+    cli.reset
+    argv = ["John Smith"]
+    assert_silent { cli.run(argv) }
+    cli.manager.must_equal "John Smith"
+    cli.arguments[:manager].value.must_equal "John Smith"
+    cli.result[:args][:manager].must_equal "John Smith"
   end
 end

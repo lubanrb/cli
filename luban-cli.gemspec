@@ -13,9 +13,9 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/lubanrb/cli"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files`.split($/)
+  spec.files         = `git ls-files`.split($/).grep(%r{^(?!spec|examples)})
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.test_files    = spec.files.grep(%r{^spec/})
   spec.require_paths = ["lib"]
 
   spec.required_ruby_version = ">= 2.1.0"

@@ -103,23 +103,35 @@ module Luban
         end
         _base = self
         parse_method = preserve_argv ? :parse : :parse!
-        @app.define_singleton_method(@starter_method) do |argv=_base.default_argv|
-          _base.send(parse_method, argv)
-          begin
-            if _base.result[:opts][:help]
-              _base.show_help
-            elsif _base.result[:opts][:version]
-              _base.show_version
-            else
-              _base.validate_required_options
-              _base.validate_required_arguments
-              instance_exec(**_base.result, &handler)
-            end
-          rescue OptionParser::ParseError, Error => e
-            _base.on_parse_error(e)
+        define_starter do |argv=_base.default_argv|
+          _base.send(:process, parse_method, argv) do |result|
+            instance_exec(**result, &handler)
           end
         end
         @action_defined = true
+      end
+
+      def define_starter(&starter_blk)
+        @app.send(method_creator, @starter_method, &starter_blk)
+      end
+
+      def method_creator
+        @method_creator ||= @app.is_a?(Class) ? :define_method : :define_singleton_method
+      end
+
+      def process(parse_method, argv)
+        send(parse_method, argv)
+        if result[:opts][:help]
+          show_help
+        elsif result[:opts][:version]
+          show_version
+        else
+          validate_required_options
+          validate_required_arguments
+          yield result
+        end
+      rescue OptionParser::ParseError, Error => e
+        on_parse_error(e)
       end
 
       def on_parse_error(error)

@@ -1,8 +1,6 @@
 module Luban
   module CLI
     class Argument
-      class Error < StandardError; end
-      class MissingRequiredArgument < Error; end
       class InvalidArgumentValue < Error; end
       class TypeCastingFailed < Error; end
       
@@ -44,17 +42,30 @@ module Luban
       def has_default?; !@config[:default].nil?; end
       def multiple?; @config[:multiple]; end
 
-      def validate(value)
-        if missing?(value)
-          raise MissingRequiredArgument, "Missing required #{kind}: #{display_name}"
-        end
+      def validate(value = @value)
         unless valid?(value)
           raise InvalidArgumentValue, "Invalid value of #{kind} #{display_name}: #{value.inspect}"
         end
       end
 
-      def valid?(value)
+      def valid?(value = @value)
         !missing?(value) and match?(value) and within?(value) and assured?(value)
+      end
+
+      def missing?(value = @value)
+        required? and value.nil?
+      end
+
+      def match?(value = @value)
+        @config[:match].nil? ? true : !!@config[:match].match(value)
+      end
+
+      def within?(value = @value)
+        @config[:within].nil? ? true : @config[:within].include?(value)
+      end
+
+      def assured?(value = @value)
+        @config[:assure].nil? ? true : !!@config[:assure].call(value)
       end
 
       protected
@@ -131,22 +142,6 @@ module Luban
         else
           value
         end
-      end
-
-      def missing?(value)
-        required? and value.nil?
-      end
-
-      def match?(value)
-        @config[:match].nil? ? true : !!@config[:match].match(value)
-      end
-
-      def within?(value)
-        @config[:within].nil? ? true : @config[:within].include?(value)
-      end
-
-      def assured?(value)
-        @config[:assure].nil? ? true : !!@config[:assure].call(value)
       end
 
       def process(value)

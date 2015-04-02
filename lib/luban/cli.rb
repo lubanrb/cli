@@ -1,3 +1,4 @@
+require_relative "cli/error"
 require_relative "cli/version"
 require_relative "cli/commands"
 require_relative "cli/base"

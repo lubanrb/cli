@@ -10,8 +10,10 @@ module Luban
     class Base
       include Commands
 
-      class MissingCommand < Option::Error; end
-      class InvalidCommand < Option::Error; end
+      class MissingCommand < Error; end
+      class InvalidCommand < Error; end
+      class MissingRequiredOptions < Error; end
+      class MissingRequiredArguments < Error; end
 
       DefaultSummaryWidth = 32
       DefaultSummaryIndent = 4
@@ -30,9 +32,10 @@ module Luban
       attr_accessor :summary_width
       attr_accessor :summary_indent
 
-      def initialize(app_class, starter_method, &config_blk)
-        @app_class = app_class
+      def initialize(app, starter_method, &config_blk)
+        @app = app
         @starter_method = starter_method
+        @action_defined = false
 
         @program_name = default_program_name
         @options = {}
@@ -48,9 +51,7 @@ module Luban
         @summary_indent = DefaultSummaryIndent
 
         configure(&config_blk)
-        unless @app_class.instance_methods(false).include?(@starter_method)
-          setup_default_starter
-        end
+        setup_default_starter unless @action_defined
       end
 
       def parser
@@ -98,6 +99,20 @@ module Luban
           raise InvalidCommand, "Invalid command. Expected command: #{list_commands.join(', ')}"
         end
       end
+
+      def validate_required_options
+        missing_opts = @options.each_value.select(&:missing?).collect(&:display_name)
+        unless missing_opts.empty?
+          raise MissingRequiredOptions, "Missing required option(s): #{missing_opts.join(', ')}"
+        end
+      end
+
+      def validate_required_arguments
+        missing_args = @arguments.each_value.select(&:missing?).collect(&:display_name)
+        unless missing_args.empty?
+          raise MissingRequiredArguments, "Missing required argument(s): #{missing_args.join(', ')}"
+        end
+      end      
 
       def create_parser
         @parser = OptionParser.new

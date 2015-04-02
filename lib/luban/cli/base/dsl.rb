@@ -101,18 +101,40 @@ module Luban
         if handler.nil?
           raise ArgumentError, "Code block to execute command #{@starter_method} is MISSING."
         end
-        _command = self
+        _base = self
         parse_method = preserve_argv ? :parse : :parse!
-        @app_class.send(:define_method, @starter_method) do |argv=_command.default_argv|
-          _command.send(parse_method, argv)
-          if _command.result[:opts][:help]
-            _command.show_help
-          elsif _command.result[:opts][:version]
-            _command.show_version
-          else
-            instance_exec(**_command.result, &handler)
+        @app.define_singleton_method(@starter_method) do |argv=_base.default_argv|
+          _base.send(parse_method, argv)
+          begin
+            if _base.result[:opts][:help]
+              _base.show_help
+            elsif _base.result[:opts][:version]
+              _base.show_version
+            else
+              _base.validate_required_options
+              _base.validate_required_arguments
+              instance_exec(**_base.result, &handler)
+            end
+          rescue OptionParser::ParseError, Error => e
+            _base.on_parse_error(e)
           end
         end
+        @action_defined = true
+      end
+
+      def on_parse_error(error)
+        show_error_and_exit(error)
+      end
+
+      def show_error_and_exit(error)
+        show_error(error)
+        show_help
+        exit 64 # Linux standard for bad command line
+      end
+
+      def show_error(error)
+        puts "#{error.message} (#{error.class.name})"
+        puts
       end
     end
   end

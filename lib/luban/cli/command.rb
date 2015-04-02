@@ -3,7 +3,7 @@ module Luban
     class Command < Base
       attr_reader :name
 
-      def initialize(app_class, name, &config_blk)
+      def initialize(app, name, &config_blk)
         super
         @name = name
       end

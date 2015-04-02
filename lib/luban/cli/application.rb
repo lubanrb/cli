@@ -6,7 +6,7 @@ module Luban
       attr_reader :rc
 
       def initialize(starter_method = :run, &config_blk)
-        super(self.class, starter_method, &config_blk)
+        super(self, starter_method, &config_blk)
         @rc = init_rc
         validate
       end

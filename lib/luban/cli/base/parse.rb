@@ -13,9 +13,6 @@ module Luban
           parse_with_commands(argv)
         end
         update_result(argv)
-      rescue OptionParser::ParseError, 
-             Option::Error => e
-        on_parse_error(e)
       end
 
       protected
@@ -50,17 +47,6 @@ module Luban
         @result[:opts] = options.values.inject({}) { |r, o| r[o.name] = o.value; r }
         @result[:args] = arguments.values.inject({}) { |r, a| r[a.name] = a.value; r }
         @result
-      end
-
-      def on_parse_error(error)
-        show_error_and_exit(error)
-      end
-
-      def show_error_and_exit(error)
-        puts "#{error.message} (#{error.class.name})"
-        puts
-        show_help
-        exit 64 # Linux standard for bad command line
       end
     end
   end

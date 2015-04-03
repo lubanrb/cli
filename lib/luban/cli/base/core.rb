@@ -34,11 +34,11 @@ module Luban
       attr_accessor :summary_width
       attr_accessor :summary_indent
 
-      def initialize(app, starter_method, prefix: '', &config_blk)
+      def initialize(app, action_name, prefix: '', &config_blk)
         @app = app
-        @starter_method = starter_method
+        @action_name = action_name
         @prefix = prefix
-        @action_method = "#{@prefix}#{@starter_method}"
+        @action_method = "#{@prefix}#{@action_name}"
         @action_defined = false
 
         @program_name = default_program_name
@@ -55,7 +55,7 @@ module Luban
         @summary_indent = DefaultSummaryIndent
 
         configure(&config_blk)
-        setup_default_starter unless @action_defined
+        setup_default_action unless @action_defined
       end
 
       def parser
@@ -79,8 +79,8 @@ module Luban
         instance_eval(&config_blk) unless config_blk.nil?
       end
 
-      def setup_default_starter
-        method = @starter_method
+      def setup_default_action
+        method = @action_method
         if has_commands?
           action :dispatch_command
         else

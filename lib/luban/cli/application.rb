@@ -5,8 +5,8 @@ module Luban
     class Application < Base
       attr_reader :rc
 
-      def initialize(starter_method = :run, &config_blk)
-        super(self, starter_method, &config_blk)
+      def initialize(action_name = :run, &config_blk)
+        super(self, action_name, &config_blk)
         @rc = init_rc
         validate
       end

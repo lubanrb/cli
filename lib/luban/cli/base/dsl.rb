@@ -99,11 +99,11 @@ module Luban
                     blk
                   end
         if handler.nil?
-          raise ArgumentError, "Code block to execute command #{@starter_method} is MISSING."
+          raise ArgumentError, "Code block to execute command #{@action_name} is MISSING."
         end
         _base = self
         parse_method = preserve_argv ? :parse : :parse!
-        define_starter do |argv=_base.default_argv|
+        define_action_method do |argv=_base.default_argv|
           _base.send(:process, parse_method, argv) do |result|
             instance_exec(**result, &handler)
           end
@@ -111,8 +111,8 @@ module Luban
         @action_defined = true
       end
 
-      def define_starter(&starter_blk)
-        @app.send(method_creator, action_method, &starter_blk)
+      def define_action_method(&action_blk)
+        @app.send(method_creator, action_method, &action_blk)
       end
 
       def method_creator

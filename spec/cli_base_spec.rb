@@ -1,8 +1,8 @@
 require_relative 'spec_helper'
 
 class TestCLIBase < Luban::CLI::Base
-  def initialize(starter_method = :run, **opts, &config_blk)
-    super(self, starter_method, **opts, &config_blk)
+  def initialize(action_name = :run, **opts, &config_blk)
+    super(self, action_name, **opts, &config_blk)
   end
 end
 
@@ -44,8 +44,8 @@ class TestCLIBaseWithCommands < TestCLIBaseWithAction
   end
 end
 
-def create_cli_base(klass = TestCLIBase, starter_method = :run, **opts, &config_blk)
-  klass.new(starter_method, **opts, &config_blk)
+def create_cli_base(klass = TestCLIBase, action_name = :run, **opts, &config_blk)
+  klass.new(action_name, **opts, &config_blk)
 end
 
 describe Luban::CLI::Base do
@@ -72,7 +72,7 @@ describe Luban::CLI::Base do
     cli.class.config_blk.must_be_nil
   end
 
-  it "can set prefix and starter_method" do
+  it "can set prefix and action_name" do
     cli = create_cli_base(TestCLIBase, :start, prefix: '__my_')
     cli.prefix.must_equal '__my_'
     cli.action_method.must_equal '__my_start'

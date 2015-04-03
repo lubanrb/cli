@@ -1,8 +1,8 @@
 require_relative 'spec_helper'
 
 class TestCLIBase < Luban::CLI::Base
-  def initialize(starter_method = :run, &config_blk)
-    super(self, starter_method, &config_blk)
+  def initialize(starter_method = :run, **opts, &config_blk)
+    super(self, starter_method, **opts, &config_blk)
   end
 end
 
@@ -44,13 +44,15 @@ class TestCLIBaseWithCommands < TestCLIBaseWithAction
   end
 end
 
-def create_cli_base(klass = TestCLIBase, starter_method = :run, &config_blk)
-  klass.new(starter_method, &config_blk)
+def create_cli_base(klass = TestCLIBase, starter_method = :run, **opts, &config_blk)
+  klass.new(starter_method, **opts, &config_blk)
 end
 
 describe Luban::CLI::Base do
   it "sets up default cli base" do
     cli = create_cli_base
+    cli.prefix.must_equal ''
+    cli.action_method.must_equal 'run'
     cli.program_name.must_equal cli.default_program_name
     cli.options.must_be_empty
     cli.arguments.must_be_empty
@@ -68,6 +70,13 @@ describe Luban::CLI::Base do
     assert_raises(NotImplementedError) { cli.run } 
     cli.parser.must_be_kind_of(OptionParser)
     cli.class.config_blk.must_be_nil
+  end
+
+  it "can set prefix and starter_method" do
+    cli = create_cli_base(TestCLIBase, :start, prefix: '__my_')
+    cli.prefix.must_equal '__my_'
+    cli.action_method.must_equal '__my_start'
+    assert_respond_to(cli, :__my_start)
   end
 
   it "can set class configurations" do
@@ -328,7 +337,7 @@ describe Luban::CLI::Base do
 
   it "supports subcommands" do
     cli = create_cli_base(TestCLIBaseWithCommands)
-    cli.respond_to?(:create).must_equal true
+    cli.respond_to?(:__command_create).must_equal true
     assert_raises(SystemExit) { cli.run }
     cli.reset
     assert_silent { cli.run(["create", "John Smith"]) }

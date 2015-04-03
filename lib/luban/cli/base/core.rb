@@ -19,6 +19,8 @@ module Luban
       DefaultSummaryIndent = 4
       DefaultTitleIndent = 2
 
+      attr_reader :prefix
+      attr_reader :action_method
       attr_reader :program_name
       attr_reader :options
       attr_reader :arguments
@@ -32,9 +34,11 @@ module Luban
       attr_accessor :summary_width
       attr_accessor :summary_indent
 
-      def initialize(app, starter_method, &config_blk)
+      def initialize(app, starter_method, prefix: '', &config_blk)
         @app = app
         @starter_method = starter_method
+        @prefix = prefix
+        @action_method = "#{@prefix}#{@starter_method}"
         @action_defined = false
 
         @program_name = default_program_name
@@ -88,7 +92,7 @@ module Luban
 
       def dispatch_command(cmd:, argv:, **params)
         validate_command(cmd)
-        send(cmd, argv)
+        send(commands[cmd].action_method, argv)
       end
 
       def validate_command(cmd)

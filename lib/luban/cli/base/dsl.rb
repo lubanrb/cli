@@ -112,7 +112,7 @@ module Luban
       end
 
       def define_starter(&starter_blk)
-        @app.send(method_creator, @starter_method, &starter_blk)
+        @app.send(method_creator, action_method, &starter_blk)
       end
 
       def method_creator

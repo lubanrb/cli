@@ -81,12 +81,8 @@ module Luban
 
       def setup_default_action
         method = @action_method
-        if has_commands?
-          action :dispatch_command
-        else
-          action do |**opts|
-            raise NotImplementedError, "#{self.class.name}##{method} is an abstract method."
-          end
+        action do |**opts|
+          raise NotImplementedError, "#{self.class.name}##{method} is an abstract method."
         end
       end
 

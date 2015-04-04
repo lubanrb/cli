@@ -126,9 +126,13 @@ module Luban
         elsif result[:opts][:version]
           show_version
         else
-          validate_required_options
-          validate_required_arguments
-          yield result
+          if has_commands?
+            dispatch_command(**result)
+          else
+            validate_required_options
+            validate_required_arguments
+            yield result
+          end
         end
       rescue OptionParser::ParseError, Error => e
         on_parse_error(e)

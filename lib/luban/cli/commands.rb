@@ -33,8 +33,13 @@ module Luban
           !commands.empty?
         end
 
-        def command(cmd, &blk)
-          commands[cmd] = Command.new(self, cmd, &blk)
+        def command_class(cmd)
+          "#{cmd.to_s.capitalize}Command"
+        end
+
+        def command(cmd, **opts, &blk)
+          cmd_class = self.const_set(command_class(cmd), Class.new(Command))
+          commands[cmd] = cmd_class.new(self, cmd, **opts, &blk)
         end
 
         def undef_command(cmd)
@@ -58,6 +63,15 @@ module Luban
 
         def has_commands?
           self.class.has_commands?
+        end
+
+        def command(cmd, **opts, &blk)
+          opts[:parent] = self if self.is_a?(Command)
+          self.class.command(cmd, **opts, &blk)
+        end
+
+        def undef_command(cmd)
+          self.class.undef_command(cmd)
         end
       end
     end

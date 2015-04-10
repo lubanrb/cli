@@ -6,21 +6,7 @@ module Luban
         base.send(:include, InstanceMethods)
       end
 
-      module ClassMethods
-        def inherited(subclass)
-          # Ensure commands from base class
-          # got inherited to its subclasses
-          subclass.instance_variable_set(
-            '@commands',
-            Marshal.load(Marshal.dump(instance_variable_get('@commands')))
-          )
-          super
-        end
-
-        def commands
-          @commands ||= {}
-        end
-
+      module CommonMethods
         def list_commands
           commands.keys
         end
@@ -32,37 +18,49 @@ module Luban
         def has_commands?
           !commands.empty?
         end
+      end
+
+      module ClassMethods
+        include CommonMethods
+
+        def commands
+          @commands ||= {}
+        end
 
         def command_class(cmd)
-          "#{cmd.to_s.capitalize}Command"
+          "#{classify(cmd)}Command"
         end
 
         def command(cmd, **opts, &blk)
-          cmd_class = self.const_set(command_class(cmd), Class.new(Command))
-          commands[cmd] = cmd_class.new(self, cmd, **opts, &blk)
+          cmd_class = command_class(cmd)
+          klass = if self.const_defined?(command_class(cmd))
+                    self.const_get(command_class(cmd))
+                  else
+                    self.const_set(command_class(cmd), Class.new(Command))
+                  end
+          commands[cmd] = klass.new(self, cmd, **opts, &blk)
         end
 
         def undef_command(cmd)
-          commands.delete(cmd)
-          undef_method(cmd)
+          undef_method(commands.delete(cmd).action_method)
+        end
+
+        protected
+
+        def classify(cmd)
+          cmd = cmd.to_s.dup
+          cmd.gsub!(/\/(.?)/){ "::#{$1.upcase}" }
+          cmd.gsub!(/(?:_+|-+)([a-z])/){ $1.upcase }
+          cmd.gsub!(/(\A|\s)([a-z])/){ $1 + $2.upcase }
+          cmd
         end
       end
 
       module InstanceMethods
+        include CommonMethods
+
         def commands
           self.class.commands
-        end
-
-        def list_commands
-          commands.keys
-        end
-
-        def has_command?(cmd)
-          self.class.has_command?(cmd)
-        end
-
-        def has_commands?
-          self.class.has_commands?
         end
 
         def command(cmd, **opts, &blk)

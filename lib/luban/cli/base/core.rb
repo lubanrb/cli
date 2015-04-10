@@ -34,7 +34,7 @@ module Luban
       attr_accessor :summary_width
       attr_accessor :summary_indent
 
-      def initialize(app, action_name, prefix: '', &config_blk)
+      def initialize(app, action_name, prefix: default_prefix, auto_help: true, &config_blk)
         @app = app
         @action_name = action_name
         @prefix = prefix
@@ -56,7 +56,10 @@ module Luban
 
         configure(&config_blk)
         setup_default_action unless @action_defined
+        self.auto_help if auto_help
       end
+
+      def default_prefix; ''; end
 
       def parser
         @parser ||= create_parser

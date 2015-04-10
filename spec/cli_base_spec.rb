@@ -54,7 +54,8 @@ describe Luban::CLI::Base do
     cli.prefix.must_equal ''
     cli.action_method.must_equal 'run'
     cli.program_name.must_equal cli.default_program_name
-    cli.options.must_be_empty
+    cli.options.wont_be_empty
+    cli.options.has_key?(:help).must_equal true
     cli.arguments.must_be_empty
     cli.summary.must_equal ''
     cli.description.must_equal ''
@@ -158,9 +159,19 @@ describe Luban::CLI::Base do
   end
 
   it "adds help" do
+    # By default, adds help with default parameters
+    cli = create_cli_base
+    cli.options.has_key?(:help).must_equal true
+    cli.options[:help].kind.must_equal "switch"
+    cli.options[:help].must_be_kind_of(Luban::CLI::Switch)
+    cli.options[:help].name.must_equal :help
+    cli.options[:help].description.must_equal "Show this help message."
+    cli.options[:help][:short].must_equal :h     
+
+    # Add help thru DSL
     [:help, :auto_help].each do |meth|
       # Adds help with default parameters
-      cli = create_cli_base { send(meth) }
+      cli = create_cli_base(auto_help: false) { send(meth) }
       cli.options.has_key?(:help).must_equal true
       cli.options[:help].kind.must_equal "switch"
       cli.options[:help].must_be_kind_of(Luban::CLI::Switch)
@@ -168,7 +179,7 @@ describe Luban::CLI::Base do
       cli.options[:help].description.must_equal "Show this help message."
       cli.options[:help][:short].must_equal :h      
       # Adds help with customized parameters
-      cli = create_cli_base { send(meth, short: :i, desc: "Show this help info.") }
+      cli = create_cli_base(auto_help: false) { send(meth, short: :i, desc: "Show this help info.") }
       cli.options.has_key?(:help).must_equal true
       cli.options[:help].description.must_equal "Show this help info."
       cli.options[:help][:short].must_equal :i

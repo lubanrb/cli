@@ -4,11 +4,13 @@ module Luban
       attr_reader :name
       attr_reader :parent
 
-      def initialize(app, name, parent: nil, prefix: '__command_', &config_blk)
+      def initialize(app, name, parent: nil, **opts, &config_blk)
         @name = name
         @parent = parent
-        super(app, name, prefix: prefix, &config_blk)
+        super(app, name, **opts, &config_blk)
       end
+
+      def default_prefix; '__command_'; end
 
       protected
 

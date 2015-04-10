@@ -8,15 +8,14 @@ module Luban
         
         def configure(&blk); @config_blk = blk; end
 
-        def help_command(auto_help: true, &blk)
+        def help_command(**opts, &blk)
           if block_given?
-            command(:help, &blk)
+            command(**opts, &blk)
           else
-            command(:help) do
+            command(:help, **opts) do
               desc "List all commands or help for one command"
               argument :command, "Command to help for", 
                        type: :symbol, required: false
-              self.auto_help if auto_help
               action :show_help_for_command
             end
           end

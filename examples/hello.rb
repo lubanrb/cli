@@ -17,7 +17,6 @@ class HelloApp < Luban::CLI::Application
            type: :symbol, default: :english, within: Languages
     switch :verbose, "Run in verbose mode", short: :V 
     argument :name, "Name to say hello"
-    auto_help
     action :say_hello
   end
 

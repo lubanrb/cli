@@ -2,11 +2,11 @@ module Luban
   module CLI
     class Command < Base
       attr_reader :name
-      attr_reader :parent
+      attr_reader :command_chain
 
-      def initialize(app, name, parent: nil, **opts, &config_blk)
+      def initialize(app, name, command_chain: [name], **opts, &config_blk)
         @name = name
-        @parent = parent
+        @command_chain = command_chain
         super(app, name, **opts, &config_blk)
       end
 
@@ -14,19 +14,8 @@ module Luban
 
       protected
 
-      def command_chain
-        return @command_chain unless @command_chain.nil?
-        chain = [name]
-        next_parent = parent
-        while !next_parent.nil?
-          chain.unshift next_parent.name
-          next_parent = next_parent.parent
-        end
-        @command_chain = chain.join(' ')
-      end
-
       def compose_banner
-        "Usage: #{program_name} #{command_chain} #{compose_synopsis}"
+        "Usage: #{program_name} #{command_chain.map(&:to_s).join(' ')} #{compose_synopsis}"
       end
     end
   end

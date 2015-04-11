@@ -31,14 +31,14 @@ module Luban
           "#{classify(cmd)}Command"
         end
 
-        def command(cmd, **opts, &blk)
+        def command(app = self, cmd, **opts, &blk)
           cmd_class = command_class(cmd)
           klass = if self.const_defined?(command_class(cmd))
                     self.const_get(command_class(cmd))
                   else
                     self.const_set(command_class(cmd), Class.new(Command))
                   end
-          commands[cmd] = klass.new(self, cmd, **opts, &blk)
+          commands[cmd] = klass.new(app, cmd, **opts, &blk)
         end
 
         def undef_command(cmd)
@@ -64,8 +64,12 @@ module Luban
         end
 
         def command(cmd, **opts, &blk)
-          opts[:parent] = self if self.is_a?(Command)
-          self.class.command(cmd, **opts, &blk)
+          if self.is_a?(Command)
+            opts[:command_chain] = self.command_chain.clone.push(cmd)
+            self.class.command(self.app, cmd, **opts, &blk)
+          else
+            self.class.command(cmd, **opts, &blk)
+          end
         end
 
         def undef_command(cmd)

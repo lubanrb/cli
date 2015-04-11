@@ -18,9 +18,9 @@ describe Luban::CLI::Command do
     @cmd.commands[:nested_cmd].name.must_equal :nested_cmd
   end
 
-  it "has a parent" do
-    @cmd.parent.must_be_nil
-    @cmd.commands[:nested_cmd].parent.must_be_instance_of(Luban::CLI::Command)
+  it "has a command chain" do
+    @cmd.command_chain.must_equal [:test_cmd]
+    @cmd.commands[:nested_cmd].command_chain.must_equal [:test_cmd, :nested_cmd]
   end
 
   it "composes command synopsis with a proper command chain" do

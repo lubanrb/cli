@@ -102,8 +102,8 @@ module Luban
         end
         _base = self
         parse_method = preserve_argv ? :parse : :parse!
-        define_action_method do |argv=_base.default_argv|
-          _base.send(:process, parse_method, argv) do |result|
+        define_action_method do |argv = _base.default_argv|
+          _base.send(:process, self, parse_method, argv) do |result|
             instance_exec(**result, &handler)
           end
         end
@@ -118,7 +118,7 @@ module Luban
         @method_creator ||= @app.is_a?(Class) ? :define_method : :define_singleton_method
       end
 
-      def process(parse_method, argv)
+      def process(context, parse_method, argv)
         send(parse_method, argv)
         if result[:opts][:help]
           show_help
@@ -126,7 +126,7 @@ module Luban
           show_version
         else
           if has_commands?
-            dispatch_command(**result)
+            dispatch_command(context, **result)
           else
             validate_required_options
             validate_required_arguments

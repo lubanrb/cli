@@ -19,6 +19,7 @@ module Luban
       DefaultSummaryIndent = 4
       DefaultTitleIndent = 2
 
+      attr_reader :app
       attr_reader :prefix
       attr_reader :action_method
       attr_reader :program_name
@@ -89,9 +90,9 @@ module Luban
         end
       end
 
-      def dispatch_command(cmd:, argv:, **params)
+      def dispatch_command(context, cmd:, argv:, **params)
         validate_command(cmd)
-        send(commands[cmd].action_method, argv)
+        context.send(commands[cmd].action_method, argv)
       end
 
       def validate_command(cmd)

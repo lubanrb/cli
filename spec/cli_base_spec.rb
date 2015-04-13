@@ -313,7 +313,7 @@ describe Luban::CLI::Base do
     assert_raises(SystemExit) { cli.run(argv) }
     cli.reset
     argv = ["--project", "test project"]
-    assert_silent {cli.run(argv) }
+    assert_silent { cli.run(argv) }
     cli.project.must_equal "test project"
     cli.options[:project].value.must_equal "test project"
     cli.result[:opts][:project].must_equal "test project"

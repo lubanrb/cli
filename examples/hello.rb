@@ -30,6 +30,8 @@ class HelloApp < Luban::CLI::Application
     end
   end
 
+  protected
+
   def say_hello_verbosely(hello_text, name, opts, args)
     puts "Options: #{opts.inspect}"
     puts "Arguments: #{args.inspect}"

@@ -49,7 +49,9 @@ module Luban
       end
 
       def valid?(value = @value)
-        !missing?(value) and match?(value) and within?(value) and assured?(value)
+        (multiple? ? value : [value]).all? do |v| 
+          !missing?(v) and match?(v) and within?(v) and assured?(v)
+        end
       end
 
       def missing?(value = @value)
@@ -113,7 +115,7 @@ module Luban
         unless err_msg.nil?
           raise ArgumentError, "Default value for #{kind} #{display_name} #{err_msg}"
         end
-        unless (multiple? ? default : [default]).all? { |v| valid?(v) }
+        unless valid?(default)
           raise ArgumentError, "Invalid default value for #{kind} #{display_name}: #{default.inspect}"
         end
       end

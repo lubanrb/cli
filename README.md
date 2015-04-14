@@ -8,20 +8,27 @@ Luban::CLI requires Ruby 2.1 or later.
 
 Add this line to your application Gemfile:
 
+```ruby
     gem "luban-cli"
+```
 
 And then execute:
 
+```ruby
     $ bundle
+```
 
 Or install it yourself as:
 
+```ruby
     $ gem install luban-cli
+```
 
 ## Usage
 
 ### Simple Example
 
+```ruby
     require 'luban/cli'
 
     class MyApp < Luban::CLI::Application
@@ -66,9 +73,11 @@ Or install it yourself as:
     end
 
     MyApp.new.run
+```
 
 ### Sample Usage
 
+```ruby
     $ ruby my_app.rb -h
     Usage: my_app [options] NAME
 
@@ -95,6 +104,7 @@ Or install it yourself as:
     Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false}
     Arguments: {:name=>"chi"}
     Hi, Mr. John Jr.!
+```
 
 ## DSL
 
@@ -116,7 +126,9 @@ A long description of what the application does.
 
 An arguement is a positioned parameter passed from command-line. To declare an argument:
 
+```ruby
     argument :name, 'description', **modifiers, &blk
+```
 
 The modifiers below can be used:
 
@@ -136,6 +148,7 @@ Note: An argument with multiple values needs to be positioned at the last argume
 
 Here is an example how to use argument:
 
+```ruby
     class MyApp < Luban::CLI::Application
       configure do
         argument :name, 'Name for an employee'
@@ -172,12 +185,15 @@ Here is an example how to use argument:
 
     $ ruby my_app.rb john male 30 2 john@company.com john@personal.com
     {:cmd=>nil, :argv=>[], :args=>{:name=>"john", :gender=>:male, :age=>30, :level=>2, :email=>["john@company.com", "john@personal.com"]}, :opts=>{:help=>false}}
+```
 
 ### option
 
 An option usually takes an argument, e.g. --require LIBRARY. To declare an option:
 
+```ruby
     option :name, 'description', **modifiers, &blk
+```
 
 The extra modifiers below can be used along with all modifiers applicable to arguments:
 
@@ -188,6 +204,7 @@ Note: modifier :required is turned off by default. Therefore, all options are no
 
 Here is an example how to use option:
 
+```ruby
     class MyApp < Luban::CLI::Application
       configure do
         option :libraries, 'Require the LIBRARIES before executing your script', 
@@ -205,11 +222,13 @@ Here is an example how to use option:
 
     $ ruby my_app.rb -r bundler,rails
     {:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:libraries=>["bundler", "rails"], :help=>false}}
+```
 
 Occassionally an option might take an optional argument, e.g. --inplace [EXTENSION]. This kind of option is called nullable option. The nullable option is set to true if the optional argument is not provided; otherwise, the value of the option is set to the value of the argument. To declare a nullable option, you can explicitly turn off nullable modifier which is off by default.
 
 Here is an example how to use nullable option:
 
+```ruby
     class MyApp < Luban::CLI::Application
       configure do
         option :inplace, 'Edit in place (make backup if EXTENSION supplied)', 
@@ -230,6 +249,7 @@ Here is an example how to use nullable option:
 
     $ ruby my_app.rb --inplace .bak 
     {:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:inplace=>".bak", :help=>false}}
+```
 
 ### switch
 
@@ -244,12 +264,13 @@ DSL alias #auto_help is provided which applies default values for the above opti
 
 The switch of help display is turned on by default unless explicitly turning off when creating an application or a command.
 
+```ruby
     class MyApp < Luban::CLI::Application
       ... ...
     end
 
     MyApp.new(auto_help: false)
-    
+``` 
 
 ### version
 

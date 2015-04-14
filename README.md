@@ -9,19 +9,19 @@ Luban::CLI requires Ruby 2.1 or later.
 Add this line to your application Gemfile:
 
 ```ruby
-    gem "luban-cli"
+gem "luban-cli"
 ```
 
 And then execute:
 
-```sh
-    $ bundle
+```
+$ bundle
 ```
 
 Or install it yourself as:
 
-```sh
-    $ gem install luban-cli
+```
+$ gem install luban-cli
 ```
 
 ## Usage
@@ -77,7 +77,7 @@ MyApp.new.run
 
 ### Sample Usage
 
-```sh
+```
 $ ruby my_app.rb -h
 Usage: my_app [options] NAME
 
@@ -127,7 +127,7 @@ A long description of what the application does.
 An arguement is a positioned parameter passed from command-line. To declare an argument:
 
 ```ruby
-    argument :name, 'description', **modifiers, &blk
+argument :name, 'description', **modifiers, &blk
 ```
 
 The modifiers below can be used:
@@ -170,7 +170,7 @@ end
 MyApp.new.run
 ```
 
-```sh
+```
 $ ruby my_app.rb
 Missing required argument(s): NAME, GENDER, LEVEL (Luban::CLI::Base::MissingRequiredArguments)
 ... ...
@@ -194,7 +194,7 @@ $ ruby my_app.rb john male 30 2 john@company.com john@personal.com
 An option usually takes an argument, e.g. --require LIBRARY. To declare an option:
 
 ```ruby
-    option :name, 'description', **modifiers, &blk
+option :name, 'description', **modifiers, &blk
 ```
 
 The extra modifiers below can be used along with all modifiers applicable to arguments:
@@ -220,7 +220,7 @@ end
 MyApp.new.run
 ```
 
-```sh
+```
 $ ruby my_app.rb --require bundler
 {:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:libraries=>["bundler"], :help=>false}}
 
@@ -246,7 +246,7 @@ end
 MyApp.new.run
 ```
 
-```sh
+```
 $ ruby my_app.rb
 {:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:inplace=>nil, :help=>false}}
 

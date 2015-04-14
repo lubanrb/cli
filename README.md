@@ -75,8 +75,6 @@ end
 MyApp.new.run
 ```
 
-### Sample Usage
-
 ```
 $ ruby my_app.rb -h
 Usage: my_app [options] NAME
@@ -191,7 +189,7 @@ $ ruby my_app.rb john male 30 2 john@company.com john@personal.com
 
 ### option
 
-An option usually takes an argument, e.g. --require LIBRARY. To declare an option:
+An option usually takes an argument, e.g. --require LIBRARIES. To declare an option:
 
 ```ruby
 option :name, 'description', **modifiers, &blk

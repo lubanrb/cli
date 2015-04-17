@@ -39,3 +39,13 @@ Bug fixes:
   * Apply the correct method creator when defining action method
   * Dispatch command under the right class context
   * Show correct command chain between program name and synopsis when composing parser banner
+
+## Version 0.3.1 (Apr 15, 2015)
+
+Minor enhancements:
+  * Simplify keyword arguments for dispatch_command and action handler
+  * Include command chain as part of action method name for commands
+  * Enrich README with more documentation
+
+Bug fixes:
+  * Handle validation for multiple values correctly

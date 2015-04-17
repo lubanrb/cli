@@ -21,7 +21,6 @@ module Luban
 
       attr_reader :app
       attr_reader :prefix
-      attr_reader :action_method
       attr_reader :program_name
       attr_reader :options
       attr_reader :arguments
@@ -39,7 +38,6 @@ module Luban
         @app = app
         @action_name = action_name
         @prefix = prefix
-        @action_method = "#{@prefix}#{@action_name}"
         @action_defined = false
 
         @program_name = default_program_name
@@ -61,6 +59,10 @@ module Luban
       end
 
       def default_prefix; ''; end
+
+      def action_method
+        @action_method ||= "#{@prefix}#{@action_name}"
+      end
 
       def parser
         @parser ||= create_parser

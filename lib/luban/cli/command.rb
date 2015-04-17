@@ -12,6 +12,10 @@ module Luban
 
       def default_prefix; '__command_'; end
 
+      def action_method
+        @action_method ||= "#{@prefix}#{command_chain.map(&:to_s).join('_')}"
+      end
+
       protected
 
       def compose_banner

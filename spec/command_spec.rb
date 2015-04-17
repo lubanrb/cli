@@ -23,6 +23,11 @@ describe Luban::CLI::Command do
     @cmd.commands[:nested_cmd].command_chain.must_equal [:test_cmd, :nested_cmd]
   end
 
+  it "has an action method defined with a proper command chain" do
+    TestApp.instance_methods.include?(:__command_test_cmd)
+    TestApp.instance_methods.include?(:__command_test_cmd_nested_cmd)
+  end
+
   it "composes command synopsis with a proper command chain" do
     @cmd.parser.banner.must_match /#{@cmd.program_name} #{@cmd.name}/
     @cmd.commands[:nested_cmd].parser.banner.must_match /#{@cmd.program_name} #{@cmd.name} #{@cmd.commands[:nested_cmd].name}/

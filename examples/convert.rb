@@ -15,7 +15,7 @@ class ConvertApp < Luban::CLI::Application
 
     command :capitalize do
       desc 'capitalize a given string'
-      argument :str, type: :string
+      argument :str, 'String to be capitalized', type: :string
       action :capitalize_string
     end
 

@@ -180,13 +180,13 @@ Invalid value of argument AGE: 90 (Luban::CLI::Argument::InvalidArgumentValue)
 ... ...
 
 $ ruby my_app.rb john male 30 2
-{:cmd=>nil, :argv=>[], :args=>{:name=>"john", :gender=>:male, :age=>30, :level=>2, :email=>nil}, :opts=>{:help=>false}}
+{:args=>{:name=>"john", :gender=>:male, :age=>30, :level=>2, :email=>nil}, :opts=>{:help=>false}}
 
 $ ruby my_app.rb john male 30 2 john@company.com
-{:cmd=>nil, :argv=>[], :args=>{:name=>"john", :gender=>:male, :age=>30, :level=>2, :email=>["john@company.com"]}, :opts=>{:help=>false}}
+{:args=>{:name=>"john", :gender=>:male, :age=>30, :level=>2, :email=>["john@company.com"]}, :opts=>{:help=>false}}
 
 $ ruby my_app.rb john male 30 2 john@company.com john@personal.com
-{:cmd=>nil, :argv=>[], :args=>{:name=>"john", :gender=>:male, :age=>30, :level=>2, :email=>["john@company.com", "john@personal.com"]}, :opts=>{:help=>false}}
+{:args=>{:name=>"john", :gender=>:male, :age=>30, :level=>2, :email=>["john@company.com", "john@personal.com"]}, :opts=>{:help=>false}}
 ```
 
 ### option
@@ -222,10 +222,10 @@ MyApp.new.run
 
 ```
 $ ruby my_app.rb --require bundler
-{:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:libraries=>["bundler"], :help=>false}}
+{:args=>{}, :opts=>{:libraries=>["bundler"], :help=>false}}
 
 $ ruby my_app.rb -r bundler,rails
-{:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:libraries=>["bundler", "rails"], :help=>false}}
+{:args=>{}, :opts=>{:libraries=>["bundler", "rails"], :help=>false}}
 ```
 
 Occassionally an option might take an optional argument, e.g. --inplace [EXTENSION]. This kind of option is called nullable option. The nullable option is set to true if the optional argument is not provided; otherwise, the value of the option is set to the value of the argument. To declare a nullable option, you can explicitly turn off nullable modifier which is off by default.
@@ -248,13 +248,13 @@ MyApp.new.run
 
 ```
 $ ruby my_app.rb
-{:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:inplace=>nil, :help=>false}}
+{:args=>{}, :opts=>{:inplace=>nil, :help=>false}}
 
 $ ruby my_app.rb --inplace
-{:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:inplace=>true, :help=>false}}
+{:args=>{}, :opts=>{:inplace=>true, :help=>false}}
 
 $ ruby my_app.rb --inplace .bak 
-{:cmd=>nil, :argv=>[], :args=>{}, :opts=>{:inplace=>".bak", :help=>false}}
+{:args=>{}, :opts=>{:inplace=>".bak", :help=>false}}
 ```
 
 ### switch

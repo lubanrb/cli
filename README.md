@@ -104,6 +104,8 @@ Arguments: {:name=>"chi"}
 Hi, Mr. John Jr.!
 ```
 
+Please refer to [examples](examples) for more sample usage.
+
 ## DSL
 
 The following is an overview of the Luban::CLI DSL. 
@@ -234,7 +236,7 @@ Here is an example how to use nullable option:
 class MyApp < Luban::CLI::Application
   configure do
     option :inplace, 'Edit in place (make backup if EXTENSION supplied)', 
-            nullable: true
+            nullable: true # Turn the option into nullable
     action do |**params|
       puts params.inspect
     end
@@ -256,6 +258,34 @@ $ ruby my_app.rb --inplace .bak
 ```
 
 ### switch
+
+A switch is a special option that doesn't take any arguments, e.g., --verbose, --help, etc. To declare a switch:
+
+```ruby
+switch :name, 'description', **modifiers, &blk
+```
+
+All modifiers applied to an option can be used for a switch except the following:
+
+* :type - Type for switch is set to :bool (true/false) and it cannot be changed.
+* :multiple - Set to false to ensure to handle a single value and it cannot be changed.
+
+Negatable switch is also supported, e.g., --local, --no-local. To declare a negatable switch, you can explicitly turn on negatable modifier which is off by default. 
+
+Here is an example how to use negatable option:
+
+```ruby
+class MyApp < Luban::CLI::Application
+  configure do
+    switch :local, 'Check repository locally', 
+           negatable: true # Turn the switch into negatable: --local or --no-local
+  action do |**params|
+    puts params.inspect
+  end
+end
+
+MyApp.new.run
+```
 
 ### help
 
@@ -289,17 +319,141 @@ If calling with a version, a switch for version display is added to the applicat
 
 ### action
 
+Specify handler for the CLI application or command.
+
+It accepts a code block or an instance method name from the application as the action handler. If a code block is given, the code block is executed in the binding of the application. If both a code block and an instance method name are provided, the instance method name is used and the code block is ignored.
+
+The handler accepts the following keyword arguments:
+
+* :args - arguments parsed from the command-line
+* :opts - options parsed from the command-line
+
+
 ### action!
+
+Same as action, but removes command-line arguments destructively. 
 
 ### configure
 
+This is used to configure CLI application during definition.
+
+Here is an example for how to configure CLI application:
+
+```ruby
+
+class MyApp < Luban::CLI::Application
+  configure do
+    program "my_app"
+    version "1.0.0"
+    long_desc "Demo app for Luban::CLI" 
+    option :opt1, "Description for opt1", short: :o
+    switch :swt1, "Description for swt1", short: :s
+    argument :arg1, "Description to arg1"
+    action :do_something
+  end
+
+  def do_something(args:, opts:)
+    ... ...
+  end
+end
+
+MyApp.new.run
+
+```
+
+However, it can be overriden if a configuration block is provided during application instance creation:
+
+```ruby
+MyApp.new.run do
+    program "my_app"
+    version "1.0.0"
+    long_desc "Demo app for Luban::CLI" 
+    option :opt2, "Description for opt2", short: :p
+    switch :swt2, "Description for swt2", short: :w
+    action :do_something_else
+end
+
+```
+
 ## Commands
 
-### help_command
+Luban::CLI supports commands/subcommands. Commands can also be nested. However, all action handlers should be defined under the the application class, otherwise NoMethodError will be raised.
+
+```ruby
+class MyApp < Luban::CLI::Application
+  configure do
+    version '1.0.0'
+    desc 'Short description for the application'
+    long_desc 'Long description for the application'
+  end
+
+  # Define a help command to list all commands or help for one command.
+  auto_help_command
+
+  command :cmd1 do
+    desc 'Description for command 1'
+
+    command :task1 do
+      desc 'Description for task 1'
+      argument :arg1, 'Description for arg1', type: :string
+      action :exec_command1_task1
+    end
+
+    command :task2 do
+      desc 'Description for task 2'
+      option :opt1, 'Description for opt1', type: :integer
+      action :exec_command1_task2
+    end
+  end
+
+  command :cmd2 do
+    desc 'Description for command 1'
+    switch :swt1, 'Description for swt1'
+    action :exec_command2
+  end
+
+  def exec_command1_task1(args:, opts:); puts 'In command 1/task 1'; end
+  def exec_command1_task2(args:, opts:); puts 'In command 1/task 2'; end
+  def exec_command2(args:, opts:); puts 'In command 2'; end
+end
+
+MyApp.new.run
+```
+
+### Command method/handler
+
+By default, a new method will be defined for each command under the application class. Usually you don't need to call this method directly. Luban::CLI dispatches the specified command to the corresponding command method/handler properly.
+
+The command method name is composed of the following, concatenating with an underscore:
+
+* prefix - Default prefix is "__command_".
+* command chain
+  * For regular command, it is the command name itself
+  * For nested commands, it is the commands from the top to the bottom one
+
+In the example above, there are following command methods defined in MyApp:
+
+* __command_cmd1_task1
+* __command_cmd1_task2
+* __command_cmd2
+
+You can also change the prefix to your preferred one by setting the modifier :prefix when defining a command:
+
+```ruby
+command :cmd1, prefix: '__my_prefix_' do
+  ... ...
+end
+```
+
+### auto_help_command / help_command
+
+DSL method #auto_help_command is used to define a command to list all commands or help for one command. Under rare circumstances that you need to customize the help command (i.e., use a different command name like :manual), you can use DSL method #help_command which accepts the same parameters that for #command. 
 
 ## Applications
 
-### Error Handling
+Luban::CLI provides a base class for cli application, Luban::CLI::Application. You can define your own cli application by inheriting it as examples shown in the previous sections. 
+
+In addition to command-line argument parsing capabilities, Luban::CLI::Application also supports a rc file. For example, if an application called "my_app.rb", it looks up rc file ".my_apprc" under user home when the application starts up. The rc file uses YML format. If rc file is found, the content will be loaded into the instance variable :rc; if rc file is not found, the instance variable :rc will be initialized as an empty hash.
 
 ## Contributing
 

@@ -20,7 +20,7 @@ class HelloApp < Luban::CLI::Application
     action :say_hello
   end
 
-  def say_hello(cmd:, argv:, args:, opts:)
+  def say_hello(args:, opts:)
     hello_text = HelloTexts[opts[:lang]]
     name = args[:name]
     if opts[:verbose]

@@ -45,17 +45,17 @@ class ConvertApp < Luban::CLI::Application
     end
   end
 
-  def capitalize_string(args:, **others)
+  def capitalize_string(args:, opts:)
     puts "Capitalize the given string #{args[:str].inspect}:"
     puts args[:str].capitalize
   end
 
-  def join_strings(args:, opts:, **others)
+  def join_strings(args:, opts:)
     puts "Join strings #{args[:strs].inspect} with #{opts[:delimiter].inspect}:"
     puts args[:strs].join(opts[:delimiter])
   end
 
-  def rationalize_number(args:, opts:, **others)
+  def rationalize_number(args:, opts:)
     if opts[:precision].nil?
       puts "Rationalize value #{args[:value]}:"
       puts args[:value].rationalize  
@@ -65,7 +65,7 @@ class ConvertApp < Luban::CLI::Application
     end
   end
 
-  def round_number(args:, opts:, **others)
+  def round_number(args:, opts:)
     puts "Round value #{args[:value]} with precision in #{opts[:digits]} decimal digits"
     puts args[:value].round(opts[:digits])
   end

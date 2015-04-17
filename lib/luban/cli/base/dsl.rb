@@ -103,8 +103,8 @@ module Luban
         _base = self
         parse_method = preserve_argv ? :parse : :parse!
         define_action_method do |argv = _base.default_argv|
-          _base.send(:process, self, parse_method, argv) do |result|
-            instance_exec(**result, &handler)
+          _base.send(:process, self, parse_method, argv) do |params|
+            instance_exec(**params, &handler)
           end
         end
         @action_defined = true
@@ -126,11 +126,11 @@ module Luban
           show_version
         else
           if has_commands?
-            dispatch_command(context, **result)
+            dispatch_command(context, cmd: result[:cmd], argv: result[:argv])
           else
             validate_required_options
             validate_required_arguments
-            yield result
+            yield args: result[:args], opts: result[:opts]
           end
         end
       rescue OptionParser::ParseError, Error => e

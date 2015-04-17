@@ -90,7 +90,7 @@ module Luban
         end
       end
 
-      def dispatch_command(context, cmd:, argv:, **params)
+      def dispatch_command(context, cmd:, argv:)
         validate_command(cmd)
         context.send(commands[cmd].action_method, argv)
       end

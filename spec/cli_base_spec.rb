@@ -22,7 +22,7 @@ class TestCLIBaseWithAction < TestCLIBase
 
   protected
 
-  def process_options(cmd:, argv:, args:, opts:)
+  def process_options(args:, opts:)
     @project = opts[:project]
     @manager = args[:manager]
   end
@@ -219,7 +219,7 @@ describe Luban::CLI::Base do
     project = nil
     cli = create_cli_base(TestCLIBaseWithAction) do
             option :project, "project name"
-            action do |cmd:, argv:, args:, opts:|
+            action do |args:, opts:|
               project = opts[:project]
             end
           end

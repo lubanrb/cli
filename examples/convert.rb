@@ -12,6 +12,7 @@ class ConvertApp < Luban::CLI::Application
 
   command :text do
     desc 'Manipulate texts'
+    long_desc 'Provide basic operations on the given text'
 
     command :capitalize do
       desc 'capitalize a given string'
@@ -29,6 +30,7 @@ class ConvertApp < Luban::CLI::Application
 
   command :number do
     desc 'Manipulate numbers'
+    long_desc 'Provide basic operations on the given number'
 
     command :rationalize do
       desc 'Return a simpler approximation of the value within an optional specified precision'

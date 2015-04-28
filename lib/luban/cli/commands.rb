@@ -18,6 +18,31 @@ module Luban
         def has_commands?
           !commands.empty?
         end
+
+        def use_commands(mod_name)
+          mod_class = Kernel.const_get(camelcase(mod_name.to_s))
+          mod_class.constants.map { |c| mod_class.const_get(c) }.each do |c|
+            command(snakecase(c.name.sub(/Command$/, ''))) if c < Luban::CLI::Command
+          end
+        end
+
+        protected
+
+        def camelcase(str)
+          str = str.to_s.dup
+          str.gsub!(/\:(.?)/){ "::#{$1.upcase}" }
+          str.gsub!(/(?:_+|-+)([a-z])/){ $1.upcase }
+          str.gsub!(/(\A|\s)([a-z])/){ $1 + $2.upcase }
+          str
+        end
+
+        def snakecase(str)
+          str.gsub(/::/, ':').
+          gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+          gsub(/([a-z\d])([A-Z])/,'\1_\2').
+          tr("-", "_").
+          downcase
+        end
       end
 
       module ClassMethods
@@ -28,10 +53,11 @@ module Luban
         end
 
         def command_class(cmd)
-          "#{classify(cmd)}Command"
+          "#{camelcase(cmd)}Command"
         end
 
         def command(app = self, cmd, **opts, &blk)
+          cmd = cmd.to_sym
           cmd_class = command_class(cmd)
           klass = if self.const_defined?(command_class(cmd))
                     self.const_get(command_class(cmd))
@@ -44,16 +70,6 @@ module Luban
         def undef_command(cmd)
           undef_method(commands.delete(cmd).action_method)
         end
-
-        protected
-
-        def classify(cmd)
-          cmd = cmd.to_s.dup
-          cmd.gsub!(/\/(.?)/){ "::#{$1.upcase}" }
-          cmd.gsub!(/(?:_+|-+)([a-z])/){ $1.upcase }
-          cmd.gsub!(/(\A|\s)([a-z])/){ $1 + $2.upcase }
-          cmd
-        end
       end
 
       module InstanceMethods
@@ -64,6 +80,7 @@ module Luban
         end
 
         def command(cmd, **opts, &blk)
+          cmd = cmd.to_sym
           if self.is_a?(Command)
             opts[:command_chain] = self.command_chain.clone.push(cmd)
             self.class.command(self.app, cmd, **opts, &blk)

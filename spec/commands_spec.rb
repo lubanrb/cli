@@ -54,4 +54,23 @@ describe Luban::CLI::Commands do
     BCommand.has_command?(:foo).must_equal false
     BCommand.instance_methods.include?(:__command_foo).must_equal false
   end
+
+  it "supports command injection" do
+    module MyCommands
+        include Luban::CLI::Commands
+        command(:foo) do
+          action { 'hi' }
+        end
+
+        class BarCommand < Luban::CLI::Command; end
+    end
+    class TestAppWithCmdInjection
+      include Luban::CLI::Commands
+      use_commands 'my_commands'
+    end
+    TestAppWithCmdInjection.has_command?(:'my_commands:foo').must_equal true
+    TestAppWithCmdInjection.instance_methods.include?(:__command_my_commands_foo).must_equal true
+    TestAppWithCmdInjection.has_command?(:'my_commands:bar').must_equal true
+    TestAppWithCmdInjection.instance_methods.include?(:__command_my_commands_bar).must_equal true
+  end
 end

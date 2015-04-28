@@ -61,7 +61,7 @@ module Luban
       def default_prefix; ''; end
 
       def action_method
-        @action_method ||= "#{@prefix}#{@action_name}"
+        @action_method ||= "#{@prefix}#{@action_name.to_s.gsub(':', '_')}"
       end
 
       def parser
@@ -94,7 +94,12 @@ module Luban
 
       def dispatch_command(context, cmd:, argv:)
         validate_command(cmd)
-        context.send(commands[cmd].action_method, argv)
+        cmd_method = commands[cmd].action_method
+        if respond_to?(cmd_method)
+          send(cmd_method, argv)
+        else          
+          context.send(cmd_method, argv)
+        end
       end
 
       def validate_command(cmd)

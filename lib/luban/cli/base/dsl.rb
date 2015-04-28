@@ -12,10 +12,12 @@ module Luban
           if block_given?
             command(**opts, &blk)
           else
+            validator = method(:has_command?)
             command(:help, **opts) do
               desc "List all commands or help for one command"
               argument :command, "Command to help for", 
-                       type: :symbol, required: false
+                       type: :symbol, required: false,
+                       assure: validator
               action :show_help_for_command
             end
           end

@@ -1,5 +1,15 @@
 # Change log
 
+## Version 0.3.2 (Apr 28, 2015)
+
+Minor enhancements:
+  * Add use_commands DSL to inject command definitions to a given Luban app or command
+  * Add an example to demonstrate command injection
+
+Bug fixes:
+  * Add validation to help command
+  * Command dispatching within the correct context
+
 ## Version 0.3.1 (Apr 15, 2015)
 
 Minor enhancements:

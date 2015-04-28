@@ -449,6 +449,62 @@ end
 
 DSL method #auto_help_command is used to define a command to list all commands or help for one command. Under rare circumstances that you need to customize the help command (i.e., use a different command name like :manual), you can use DSL method #help_command which accepts the same parameters that for #command. 
 
+### Command injection
+
+Commands can be defined directly within the Luban app class like examples shown in the previous sections. In addition, commands can be defined separately and injected into a given Luban app later. Command definition can be also namespaced by using module. With this feature, commands can be designed in a more re-usable and scalable way. This feature also implies that Luban CLI application supports namespaced commands.
+
+Below is an example demonstrating how command injection is supposed to work.
+
+```ruby
+module App
+  module ControlTasks
+    class Task1Command < Luban::CLI::Command
+      configure do
+        ... ...
+      end
+    end
+
+    class Task2Command < Luban::CLI::Command
+      configure do
+        ... ...
+      end
+    end
+  end
+end
+
+class MyApp < Luban::CLI::Application
+  configure do
+    ... ...
+  end
+
+  # Inject Luban commands directly defined under the given module
+  use_commands 'app:control_tasks'
+
+  # Alternatively, commands can be injected individually
+  # The following has the same effect
+  # command 'app:control_tasks:task1'
+  # command 'app:control_tasks:task2'
+end
+```
+
+```
+$ ruby my_app.rb app:control_tasks:task1
+
+$ ruby my_app.rb app:control_tasks:task2
+```
+
+As shown above, there are a few naming conventions about the command class naming and injection:
+
+* Command class should has suffix "Command"
+  * For instances, Task1Command, Task2Command
+* Module name to be injected should be fully qualified
+  * namespaces/modules should be in snake case and
+  * Separated by colon as the delimiter
+  * For instances, 'app:control_tasks'
+* Alternatively, commands can be injected individually
+  * Command name should be fully qualified
+  * Suffix "Command" is no more needed
+
 ## Applications
 
 Luban::CLI provides a base class for cli application, Luban::CLI::Application. You can define your own cli application by inheriting it as examples shown in the previous sections. 

@@ -1,5 +1,19 @@
 # Change log
 
+## Version 0.4.0 (Oct 14, 2015)
+
+New features:
+  * Provide convenient method :start to create and run new instance of CLI application
+  * Added method #alter to allow change cli configuration during runtime
+
+Minor enhancements:
+  * Merge Commands module into Luban::CLI::Base
+  * Handled commands in instance level instead of class level
+    * Handled command definition and action method on its eigenclass
+    * Enhanced action method invocation to look up thru its parent
+  * Update examples accordingly
+  * Some other minor refactoring
+
 ## Version 0.3.2 (Apr 28, 2015)
 
 Minor enhancements:

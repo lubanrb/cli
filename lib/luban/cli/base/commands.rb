@@ -7,8 +7,7 @@ module Luban
       end
 
       def undef_command(cmd)
-        (class << self; self; end).send(:undef_method, @commands.delete(cmd.to_sym).action_method)
-        #undef_singleton_method(@commands.delete(cmd.to_sym).action_method)
+        undef_singleton_method(@commands.delete(cmd.to_sym).action_method)
       end
 
       def use_commands(module_name, **opts, &blk)
@@ -50,12 +49,7 @@ module Luban
       end
 
       def define_command_class(class_name, base)
-        mods = class_name.split('::')
-        cmd_class = mods.pop
-        mods.inject(self.class) do |ns, mod|
-          ns.const_set(mod, Module.new) unless ns.const_defined?(mod, false)
-          ns.const_get(mod, false)
-        end.const_set(cmd_class, Class.new(base))
+        self.class.send(:define_class, class_name, base: base, namespace: self.class)
       end
 
       def camelcase(str)

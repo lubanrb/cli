@@ -1,28 +1,18 @@
 module Luban
   module CLI
     class Base
-      include Commands
-
       class << self
-        attr_reader :config_blk
-        
-        def configure(&blk); @config_blk = blk; end
-
-        def help_command(**opts, &blk)
-          if block_given?
-            command(**opts, &blk)
-          else
-            validator = method(:has_command?)
-            command(:help, **opts) do
-              desc "List all commands or help for one command"
-              argument :command, "Command to help for", 
-                       type: :symbol, required: false,
-                       assure: validator
-              action :show_help_for_command
-            end
-          end
+        def inherited(subclass)
+          super
+          # Ensure configuration block from base class
+          # got inherited to its subclasses
+          blk = instance_variable_get('@config_blk')
+          subclass.instance_variable_set('@config_blk', blk.clone) unless blk.nil?
         end
-        alias_method :auto_help_command, :help_command
+
+        attr_reader :config_blk
+
+        def configure(&blk); @config_blk = blk; end
       end
 
       def program(name)
@@ -72,6 +62,22 @@ module Luban
         end
       end
 
+      def help_command(**opts, &blk)
+        if block_given?
+          command(**opts, &blk)
+        else
+          validator = method(:has_command?)
+          command(:help, **opts) do
+            desc "List all commands or help for one command"
+            argument :command, "Command to help for", 
+                      type: :symbol, required: false,
+                     assure: validator
+            action :show_help_for_command
+          end
+        end
+      end
+      alias_method :auto_help_command, :help_command
+
       def version(ver = nil, short: :v, desc: "Show #{program_name} version.", &blk)
         if ver.nil?
           @version
@@ -95,7 +101,7 @@ module Luban
 
       def create_action(method_name = nil, preserve_argv: true, &blk)
         handler = if method_name
-                    lambda { |**opts| send(method_name, **opts) }
+                    lambda { |**opts| invoke_action(method_name, **opts) }
                   elsif block_given?
                     blk
                   end
@@ -105,7 +111,7 @@ module Luban
         _base = self
         parse_method = preserve_argv ? :parse : :parse!
         define_action_method do |argv = _base.default_argv|
-          _base.send(:process, self, parse_method, argv) do |params|
+          _base.send(:process, parse_method, argv) do |params|
             instance_exec(**params, &handler)
           end
         end
@@ -113,26 +119,21 @@ module Luban
       end
 
       def define_action_method(&action_blk)
-        @app.send(method_creator, action_method, &action_blk)
+        @parent.send(:define_singleton_method, action_method, &action_blk)
       end
 
-      def method_creator
-        @method_creator ||= @app.is_a?(Class) ? :define_method : :define_singleton_method
-      end
-
-      def process(context, parse_method, argv)
+      def process(parse_method, argv)
         send(parse_method, argv)
         if result[:opts][:help]
           show_help
-        elsif result[:opts][:version]
+        elsif !@version.empty? and result[:opts][:version]
           show_version
         else
+          validate_required_options
+          validate_required_arguments
+          yield args: result[:args], opts: result[:opts]
           if has_commands?
-            dispatch_command(context, cmd: result[:cmd], argv: result[:argv])
-          else
-            validate_required_options
-            validate_required_arguments
-            yield args: result[:args], opts: result[:opts]
+            dispatch_command(cmd: result[:cmd], argv: result[:argv])
           end
         end
       rescue OptionParser::ParseError, Error => e

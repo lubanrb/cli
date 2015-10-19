@@ -8,8 +8,6 @@ OptionParser::Officious.delete('version')
 module Luban
   module CLI
     class Base
-      include Commands
-
       class MissingCommand < Error; end
       class InvalidCommand < Error; end
       class MissingRequiredOptions < Error; end
@@ -19,7 +17,7 @@ module Luban
       DefaultSummaryIndent = 4
       DefaultTitleIndent = 2
 
-      attr_reader :app
+      attr_reader :parent
       attr_reader :prefix
       attr_reader :program_name
       attr_reader :options
@@ -29,13 +27,14 @@ module Luban
       attr_reader :version
       attr_reader :result
       attr_reader :default_argv
+      attr_reader :commands
 
       attr_accessor :title_indent
       attr_accessor :summary_width
       attr_accessor :summary_indent
 
-      def initialize(app, action_name, prefix: default_prefix, auto_help: true, &config_blk)
-        @app = app
+      def initialize(parent, action_name, prefix: default_prefix, auto_help: true, &config_blk)
+        @parent = parent
         @action_name = action_name
         @prefix = prefix
         @action_defined = false
@@ -48,6 +47,7 @@ module Luban
         @version = ''
         @default_argv = ARGV
         @result = { cmd: nil, argv: @default_argv, args: {}, opts: {} }
+        @commands = {}
 
         @title_indent = DefaultTitleIndent
         @summary_width = DefaultSummaryWidth
@@ -78,36 +78,86 @@ module Luban
         @result = { cmd: nil, argv: @default_argv, args: {}, opts: {} }
       end
 
-      protected
-
-      def configure(&blk)
-        config_blk = block_given? ? blk : self.class.config_blk
-        instance_eval(&config_blk) unless config_blk.nil?
+      def alter(&blk)
+        instance_eval(&blk)
+        on_alter
       end
 
+      protected
+
+      def self.define_class(class_name, base:, namespace:)
+        mods = class_name.split('::')
+        cmd_class = mods.pop
+        mods.inject(namespace) do |ns, mod|
+          ns.const_set(mod, Module.new) unless ns.const_defined?(mod, false)
+          ns.const_get(mod, false)
+        end.const_set(cmd_class, Class.new(base))
+      end
+
+      def undef_singleton_method(method_name)
+        # Undefine methods that are defined in the eigenclass
+        (class << self; self; end).send(:undef_method, method_name)
+      end
+
+      def configure(&blk)
+        [self.class.config_blk, blk].each do |callback|
+          instance_eval(&callback) unless callback.nil?
+        end
+        on_configure
+      end
+
+      def on_configure; end 
+      def on_alter; end
+
       def setup_default_action
-        method = @action_method
-        action do |**opts|
-          raise NotImplementedError, "#{self.class.name}##{method} is an abstract method."
+        if has_commands?
+          action_noops
+        else
+          action_abort
         end
       end
 
-      def dispatch_command(context, cmd:, argv:)
+      def action_noops
+        action { } # NOOPS
+      end
+
+      def action_abort
+        name = @action_name
+        action do
+          abort "Aborted! Action is NOT defined for #{name} in #{self.class.name}."
+        end
+      end
+
+      def dispatch_command(cmd:, argv:)
         validate_command(cmd)
-        cmd_method = commands[cmd].action_method
-        if respond_to?(cmd_method)
-          send(cmd_method, argv)
-        else          
-          context.send(cmd_method, argv)
+        send(commands[cmd].action_method, argv)
+      end
+
+      def invoke_action(action_method, **opts)
+        handler = find_action_handler(action_method)
+        if handler.nil?
+          raise RuntimeError, "Action handler #{action_method} is MISSING."
+        else
+          handler.send(action_method, **opts)
+        end
+      end
+
+      def find_action_handler(action_method)
+        if respond_to?(action_method, true)
+          self
+        elsif @parent != self and @parent.respond_to?(:find_action_handler, true)
+          @parent.send(:find_action_handler, action_method)
+        else
+          nil
         end
       end
 
       def validate_command(cmd)
         if cmd.nil?
-          raise MissingCommand, "Missing command. Expected command: #{list_commands.join(', ')}"
+          raise MissingCommand, "Please specify a command to execute."
         end
         unless has_command?(cmd)
-          raise InvalidCommand, "Invalid command. Expected command: #{list_commands.join(', ')}"
+          raise InvalidCommand, "Invalid command: #{cmd}"
         end
       end
 

@@ -4,16 +4,21 @@ module Luban
       attr_reader :name
       attr_reader :command_chain
 
-      def initialize(app, name, command_chain: [name], **opts, &config_blk)
+      def initialize(parent, name, command_chain: [name], **opts, &config_blk)
         @name = name
         @command_chain = command_chain
-        super(app, name, **opts, &config_blk)
+        super(parent, name, **opts, &config_blk)
       end
 
       def default_prefix; '__command_'; end
 
       def action_method
         @action_method ||= "#{@prefix}#{command_chain.map(&:to_s).join('_').gsub(':', '_')}"
+      end
+
+      def command(cmd, **opts, &blk)
+        opts[:command_chain] = self.command_chain.clone.push(cmd)
+        super
       end
 
       protected

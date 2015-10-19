@@ -1,4 +1,4 @@
-$LOAD_PATH.unshift File.join(File.expand_path(File.dirname(__FILE__)), '..', 'lib')
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'minitest/autorun'
 require "luban/cli"
 

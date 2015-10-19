@@ -1,6 +1,13 @@
 require_relative 'spec_helper'
 
 describe Luban::CLI::Application do
+  it "starts up an application" do
+    klass = Class.new Luban::CLI::Application
+    klass.configure { action {} }
+    assert_respond_to(klass, :start)
+    assert_silent { klass.start }
+  end
+
   it "sets up default application" do
     app = Luban::CLI::Application.new { program 'test_app' }
     assert_respond_to(app, :run)

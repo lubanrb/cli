@@ -37,10 +37,12 @@ class TestCLIBaseWithHelp < TestCLIBase
 end
 
 class TestCLIBaseWithCommands < TestCLIBaseWithAction
-  command :create do
-    option :project, "project name"
-    argument :manager, "project manager"
-    action :process_options
+  configure do
+    command :create do
+      option :project, "project name"
+      argument :manager, "project manager"
+      action :process_options
+    end
   end
 end
 
@@ -68,7 +70,9 @@ describe Luban::CLI::Base do
     cli.summary_width.must_equal Luban::CLI::Base::DefaultSummaryWidth
     cli.summary_indent.must_equal Luban::CLI::Base::DefaultSummaryIndent
     assert_respond_to(cli, :run)
-    assert_raises(NotImplementedError) { cli.run } 
+    assert_raises(SystemExit) {
+      assert_output("", /^Abort! Action is NOT defined for/) { cli.run } 
+    }
     cli.parser.must_be_kind_of(OptionParser)
     cli.class.config_blk.must_be_nil
   end
@@ -95,10 +99,10 @@ describe Luban::CLI::Base do
   it "can create help command" do
     cli = create_cli_base(TestCLIBaseWithClassConfig)
     cli.has_command?(:help).must_equal false
-    class TestCLIBaseWithClassConfig < TestCLIBase
-      auto_help_command
+    class TestCLIBaseWithAutoHelpCommand < TestCLIBase
+      configure { auto_help_command }
     end
-    cli = create_cli_base(TestCLIBaseWithClassConfig)
+    cli = create_cli_base(TestCLIBaseWithAutoHelpCommand)
     cli.has_command?(:help).must_equal true
   end
 
@@ -348,6 +352,10 @@ describe Luban::CLI::Base do
 
   it "supports subcommands" do
     cli = create_cli_base(TestCLIBaseWithCommands)
+    cli.has_commands?.must_equal true
+    cli.list_commands.must_equal [:create]
+    cli.has_command?(:create).must_equal true
+    cli.commands.each_pair { |_, cmd|  cmd.must_be_kind_of(Luban::CLI::Command) }
     cli.respond_to?(:__command_create).must_equal true
     assert_raises(SystemExit) { cli.run }
     cli.reset
@@ -357,5 +365,33 @@ describe Luban::CLI::Base do
     assert_silent { cli.run(["create", "--project", "test project", "John Smith"]) }
     cli.project.must_equal "test project"
     cli.manager.must_equal "John Smith"
+  end
+
+  it "can undefine command" do
+    class ACommand < TestCLIBaseWithCommands; end
+    cli = create_cli_base(TestCLIBaseWithCommands)
+    cli.has_command?(:create).must_equal true
+    cli.respond_to?(:__command_create).must_equal true
+    cli.undef_command(:create)
+    cli.has_command?(:create).must_equal false
+    cli.respond_to?(:__command_create).must_equal false
+    cli = create_cli_base(TestCLIBaseWithCommands)
+    cli.has_command?(:create).must_equal true
+    cli.respond_to?(:__command_create).must_equal true
+  end
+
+  it "supports command injection" do
+    module MyCommands
+      class Foo < Luban::CLI::Command; end
+      class Bar < Luban::CLI::Command; end
+    end
+    class TestAppWithCmdInjection < TestCLIBase
+      configure { use_commands 'my_commands' }
+    end
+    cli = create_cli_base(TestAppWithCmdInjection)
+    [:foo, :bar].each do |cmd|
+      cli.has_command?(:"my_commands:#{cmd}").must_equal true
+      cli.respond_to?(:"__command_my_commands_#{cmd}").must_equal true
+    end
   end
 end

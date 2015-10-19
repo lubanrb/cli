@@ -134,7 +134,7 @@ module Luban
 
       def verify_config_assurance
         unless @config[:assure].respond_to?(:call)
-          raise ArgumentError, "Assurance of #{kind} #{display_name} must be callable."
+          raise ArgumentError, "Assurance of #{kind} #{display_name} must respond to #call."
         end
       end
 

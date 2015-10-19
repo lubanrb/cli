@@ -4,15 +4,8 @@ module Luban
   module CLI
     class Application < Base
       class << self
-        def start(class_name = nil, action_name = :run, **opts, &config_blk)
-          create(class_name, action_name, **opts, &config_blk).tap { |app| app.send(action_name) }
-        end
-
-        protected
-
-        def create(class_name, action_name = :run, **opts, &config_blk)
-          klass = class_name.nil? ? self : Object.const_get(class_name, false)
-          klass.new(action_name, **opts, &config_blk)
+        def start(action_name = :run, **opts, &config_blk)
+          new(action_name, **opts, &config_blk).send(action_name)
         end
       end
 

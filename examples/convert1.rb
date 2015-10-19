@@ -1,9 +1,13 @@
 $:.unshift File.join(File.expand_path(File.dirname(__FILE__)), '..', 'lib')
 require 'luban/cli'
 
-module App
-  class Text < Luban::CLI::Command
-    configure do
+class ConvertApp < Luban::CLI::Application
+  configure do
+    version '1.0.0'
+    desc 'Convert on simple Ruby objects'
+    long_desc 'Demo app for Luban::CLI'
+
+    command :text do
       desc 'Manipulate texts'
       long_desc 'Provide basic operations on the given text'
 
@@ -18,22 +22,10 @@ module App
         option :delimiter, 'Delimiter to join strings', short: :d, default: ', '
         argument :strs, 'Strings to be joined', type: :string, multiple: true
         action :join_strings
-      end    
+      end
     end
 
-    def capitalize_string(args:, opts:)
-      puts "Capitalize the given string #{args[:str].inspect}:"
-      puts args[:str].capitalize
-    end
-
-    def join_strings(args:, opts:)
-      puts "Join strings #{args[:strs].inspect} with #{opts[:delimiter].inspect}:"
-      puts args[:strs].join(opts[:delimiter])
-    end
-  end
-
-  class Number < Luban::CLI::Command
-    configure do
+    command :number do
       desc 'Manipulate numbers'
       long_desc 'Provide basic operations on the given number'
 
@@ -52,31 +44,32 @@ module App
       end
     end
 
-    def rationalize_number(args:, opts:)
-      if opts[:precision].nil?
-        puts "Rationalize value #{args[:value]}:"
-        puts args[:value].rationalize  
-      else
-        puts "Rationalize value #{args[:value]} with precision #{opts[:precision]}:"
-        puts args[:value].rationalize(opts[:precision])
-      end
-    end
+    auto_help_command
+  end
 
-    def round_number(args:, opts:)
-      puts "Round value #{args[:value]} with precision in #{opts[:digits]} decimal digits"
-      puts args[:value].round(opts[:digits])
+  def capitalize_string(args:, opts:)
+    puts "Capitalize the given string #{args[:str].inspect}:"
+    puts args[:str].capitalize
+  end
+
+  def join_strings(args:, opts:)
+    puts "Join strings #{args[:strs].inspect} with #{opts[:delimiter].inspect}:"
+    puts args[:strs].join(opts[:delimiter])
+  end
+
+  def rationalize_number(args:, opts:)
+    if opts[:precision].nil?
+      puts "Rationalize value #{args[:value]}:"
+      puts args[:value].rationalize  
+    else
+      puts "Rationalize value #{args[:value]} with precision #{opts[:precision]}:"
+      puts args[:value].rationalize(opts[:precision])
     end
   end
-end
 
-class ConvertApp < Luban::CLI::Application
-  configure do
-    version '1.0.0'
-    desc 'Convert on simple Ruby objects'
-    long_desc 'Demo app for Luban::CLI'
-    use_commands 'App'
-    #use_commands 'app'
-    auto_help_command
+  def round_number(args:, opts:)
+    puts "Round value #{args[:value]} with precision in #{opts[:digits]} decimal digits"
+    puts args[:value].round(opts[:digits])
   end
 end
 

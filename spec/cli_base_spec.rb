@@ -96,6 +96,13 @@ describe Luban::CLI::Base do
     cli.program_name.must_equal cli.default_program_name
   end
 
+  it "can change configuration during runtime" do
+    cli = create_cli_base(TestCLIBaseWithClassConfig)
+    cli.program_name.must_equal "test_cli"
+    cli.alter { program "new_test_cli" }
+    cli.program_name.must_equal "new_test_cli"
+  end
+
   it "can create help command" do
     cli = create_cli_base(TestCLIBaseWithClassConfig)
     cli.has_command?(:help).must_equal false

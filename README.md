@@ -43,7 +43,7 @@ class MyApp < Luban::CLI::Application
     action :say_hi
   end
 
-  def say_hi(cmd:, argv:, args:, opts:)
+  def say_hi(args:, opts:)
     name = compose_name(opts[:prefix], opts[:suffix], args[:name])
     if opts[:verbose]
       say_hi_verbosely(name, opts, args)
@@ -72,7 +72,7 @@ class MyApp < Luban::CLI::Application
   end
 end
 
-MyApp.new.run
+MyApp.start
 ```
 
 ```
@@ -149,6 +149,8 @@ Note: An argument with multiple values needs to be positioned at the last argume
 Here is an example how to use argument:
 
 ```ruby
+require 'luban/cli'
+
 class MyApp < Luban::CLI::Application
   configure do
     argument :name, 'Name for an employee'
@@ -167,7 +169,7 @@ class MyApp < Luban::CLI::Application
   end
 end
 
-MyApp.new.run
+MyApp.start
 ```
 
 ```
@@ -207,6 +209,8 @@ Note: modifier :required is turned off by default. Therefore, all options are no
 Here is an example how to use option:
 
 ```ruby
+require 'luban/cli'
+
 class MyApp < Luban::CLI::Application
   configure do
     option :libraries, 'Require the LIBRARIES before executing your script', 
@@ -217,7 +221,7 @@ class MyApp < Luban::CLI::Application
   end
 end
 
-MyApp.new.run
+MyApp.start
 ```
 
 ```
@@ -233,6 +237,8 @@ Occassionally an option might take an optional argument, e.g. --inplace [EXTENSI
 Here is an example how to use nullable option:
 
 ```ruby
+require 'luban/cli'
+
 class MyApp < Luban::CLI::Application
   configure do
     option :inplace, 'Edit in place (make backup if EXTENSION supplied)', 
@@ -243,7 +249,7 @@ class MyApp < Luban::CLI::Application
   end
 end
 
-MyApp.new.run
+MyApp.start
 ```
 
 ```
@@ -275,16 +281,19 @@ Negatable switch is also supported, e.g., --local, --no-local. To declare a nega
 Here is an example how to use negatable option:
 
 ```ruby
+require 'luban/cli'
+
 class MyApp < Luban::CLI::Application
   configure do
     switch :local, 'Check repository locally', 
            negatable: true # Turn the switch into negatable: --local or --no-local
-  action do |**params|
-    puts params.inspect
+    action do |**params|
+      puts params.inspect
+    end
   end
 end
 
-MyApp.new.run
+MyApp.start
 ```
 
 ### help
@@ -299,11 +308,13 @@ DSL alias #auto_help is provided which applies default values for the above opti
 The switch of help display is turned on by default unless explicitly turning off when creating an application or a command.
 
 ```ruby
+require 'luban/cli'
+
 class MyApp < Luban::CLI::Application
   ... ...
 end
 
-MyApp.new(auto_help: false)
+MyApp.start(auto_help: false)
 ``` 
 
 ### version
@@ -340,6 +351,7 @@ This is used to configure CLI application during definition.
 Here is an example for how to configure CLI application:
 
 ```ruby
+require 'luban/cli'
 
 class MyApp < Luban::CLI::Application
   configure do
@@ -357,59 +369,61 @@ class MyApp < Luban::CLI::Application
   end
 end
 
-MyApp.new.run
+MyApp.start
 
 ```
 
 However, it can be overriden if a configuration block is provided during application instance creation:
 
 ```ruby
-MyApp.new.run do
-    program "my_app"
-    version "1.0.0"
-    long_desc "Demo app for Luban::CLI" 
-    option :opt2, "Description for opt2", short: :p
-    switch :swt2, "Description for swt2", short: :w
-    action :do_something_else
+MyApp.start do
+  program "my_app"
+  version "1.0.0"
+  long_desc "Demo app for Luban::CLI" 
+  option :opt2, "Description for opt2", short: :p
+  switch :swt2, "Description for swt2", short: :w
+  action :do_something_else
 end
 
 ```
 
 ## Commands
 
-Luban::CLI supports commands/subcommands. Commands can also be nested. However, all action handlers should be defined under the the application class, otherwise NoMethodError will be raised.
+Luban::CLI supports commands/subcommands. Commands can also be nested. However, all action handlers are preferred to be defined under the the application class; otherwise RuntimeError will be raised.
 
 ```ruby
+require 'luban/cli'
+
 class MyApp < Luban::CLI::Application
   configure do
     version '1.0.0'
     desc 'Short description for the application'
     long_desc 'Long description for the application'
-  end
 
-  # Define a help command to list all commands or help for one command.
-  auto_help_command
+    command :cmd1 do
+      desc 'Description for command 1'
 
-  command :cmd1 do
-    desc 'Description for command 1'
+      command :task1 do
+        desc 'Description for task 1'
+        argument :arg1, 'Description for arg1', type: :string
+        action :exec_command1_task1
+      end
 
-    command :task1 do
-      desc 'Description for task 1'
-      argument :arg1, 'Description for arg1', type: :string
-      action :exec_command1_task1
+      command :task2 do
+        desc 'Description for task 2'
+        option :opt1, 'Description for opt1', type: :integer
+        action :exec_command1_task2
+      end
     end
 
-    command :task2 do
-      desc 'Description for task 2'
-      option :opt1, 'Description for opt1', type: :integer
-      action :exec_command1_task2
+    command :cmd2 do
+      desc 'Description for command 1'
+      switch :swt1, 'Description for swt1'
+      action :exec_command2
     end
-  end
 
-  command :cmd2 do
-    desc 'Description for command 1'
-    switch :swt1, 'Description for swt1'
-    action :exec_command2
+    # Define a help command to list all commands or help for one command.
+    auto_help_command
   end
 
   def exec_command1_task1(args:, opts:); puts 'In command 1/task 1'; end
@@ -417,12 +431,12 @@ class MyApp < Luban::CLI::Application
   def exec_command2(args:, opts:); puts 'In command 2'; end
 end
 
-MyApp.new.run
+MyApp.start
 ```
 
 ### Command method/handler
 
-By default, a new method will be defined for each command under the application class. Usually you don't need to call this method directly. Luban::CLI dispatches the specified command to the corresponding command method/handler properly.
+By default, a new method will be defined for each command under the application/command instance's eigenclass. Usually you don't need to call this method directly. Luban::CLI dispatches the specified command to the corresponding command method/handler properly.
 
 The command method name is composed of the following, concatenating with an underscore:
 
@@ -456,15 +470,17 @@ Commands can be defined directly within the Luban app class like examples shown 
 Below is an example demonstrating how command injection is supposed to work.
 
 ```ruby
+require 'luban/cli'
+
 module App
   module ControlTasks
-    class Task1Command < Luban::CLI::Command
+    class Task1 < Luban::CLI::Command
       configure do
         ... ...
       end
     end
 
-    class Task2Command < Luban::CLI::Command
+    class Task2 < Luban::CLI::Command
       configure do
         ... ...
       end
@@ -485,6 +501,8 @@ class MyApp < Luban::CLI::Application
   # command 'app:control_tasks:task1'
   # command 'app:control_tasks:task2'
 end
+
+MyApp.start
 ```
 
 ```
@@ -495,16 +513,14 @@ $ ruby my_app.rb app:control_tasks:task2
 
 As shown above, there are a few naming conventions about the command class naming and injection:
 
-* Command class should has suffix "Command"
-  * For instances, Task1Command, Task2Command
 * Module name to be injected should be fully qualified
   * namespaces/modules should be in snake case and
   * Separated by colon as the delimiter
-  * For instances, 'app:control_tasks'
+  * For instance, 'app:control_tasks'
 * Alternatively, commands can be injected individually
   * Command name should be fully qualified
-  * Suffix "Command" is no more needed
-
+  * For instance, 'app:control_tasks:task2'
+  
 ## Applications
 
 Luban::CLI provides a base class for cli application, Luban::CLI::Application. You can define your own cli application by inheriting it as examples shown in the previous sections. 

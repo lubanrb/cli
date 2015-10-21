@@ -96,7 +96,8 @@ module Luban
 
       def undef_singleton_method(method_name)
         # Undefine methods that are defined in the eigenclass
-        (class << self; self; end).send(:undef_method, method_name)
+        singleton_class.send(:undef_method, method_name)
+        #(class << self; self; end).send(:undef_method, method_name)
       end
 
       def configure(&blk)

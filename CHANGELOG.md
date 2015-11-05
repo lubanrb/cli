@@ -1,6 +1,6 @@
 # Change log
 
-## Version 0.4.1 (Nov 05, 2015)
+## Version 0.4.2 (Nov 05, 2015)
 
 Minor enhancements:
   * After parsing, added any remaining command line arguments to opts[:__remaining__]

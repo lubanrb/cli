@@ -389,7 +389,7 @@ end
 
 ## Option Parsing Termination
 
-It is a convention that a double hyphen is a signal to stop option interpretation and to read the remaining statements on the command line literally. Luban::CLI supports this convention and stores the remaining statements on the command line, if any, into the keyword argument :opts with a hash key :__remaining__, which is passed to the given action handler.
+It is a convention that a double hyphen is a signal to stop option interpretation and to read the remaining statements on the command line literally. Luban::CLI supports this convention and stores the remaining statements on the command line, if any, into the keyword argument :opts with a hash key :\__remaining\__, which is passed to the given action handler.
 
 The following refers to the simple example shown in the section Usage, which demonstrates the parsing result with remaining statements in option parsing termination.
 

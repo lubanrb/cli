@@ -98,7 +98,7 @@ my_app 1.0.0
 $ ruby my_app.rb john -p mr -s jr
 Hi, Mr. John Jr.!
 
-ruby my_app.rb john -p mr -s jr -V
+$ ruby my_app.rb john -p mr -s jr -V
 Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false, :__remaining__=>[]}
 Arguments: {:name=>"john"}
 Hi, Mr. John Jr.!
@@ -394,12 +394,12 @@ It is a convention that a double hyphen is a signal to stop option interpretatio
 The following refers to the simple example shown in the section Usage, which demonstrates the parsing result with remaining statements in option parsing termination.
 
 ```ruby
-ruby my_app.rb john -p mr -s jr -V
+$ ruby my_app.rb john -p mr -s jr -V
 Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false, :__remaining__=>[]}
 Arguments: {:name=>"john"}
 Hi, Mr. John Jr.!
 
-ruby my_app.rb john -p mr -s jr -V -- --test here
+$ ruby my_app.rb john -p mr -s jr -V -- --test here
 Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false, :__remaining__=>["--test", "here"]}
 Arguments: {:name=>"john"}
 Hi, Mr. John Jr.!

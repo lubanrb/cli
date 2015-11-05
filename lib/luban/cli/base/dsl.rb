@@ -131,6 +131,7 @@ module Luban
         else
           validate_required_options
           validate_required_arguments
+          result[:opts][:__remaining__] = argv
           yield args: result[:args], opts: result[:opts]
           if has_commands?
             dispatch_command(cmd: result[:cmd], argv: result[:argv])

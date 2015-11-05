@@ -1,6 +1,8 @@
 module Luban
   module CLI
     class Base
+      using CoreRefinements
+      
       def command(cmd, base: Command, **opts, &blk)
         cmd = cmd.to_sym
         @commands[cmd] = command_class(cmd, base).new(self, cmd, **opts, &blk)
@@ -11,9 +13,9 @@ module Luban
       end
 
       def use_commands(module_name, **opts, &blk)
-        module_class = Object.const_get(camelcase(module_name.to_s), false)
+        module_class = Object.const_get(module_name.camelcase, false)
         module_class.constants(false).map { |c| module_class.const_get(c, false) }.each do |c|
-          command(snakecase(c.name), base: c, **opts, &blk) if c < Command
+          command(c.name.snakecase, base: c, **opts, &blk) if c < Command
         end
       end
 
@@ -32,7 +34,7 @@ module Luban
       protected
 
       def command_class(cmd, base)
-        class_name = camelcase(cmd)
+        class_name = cmd.camelcase
         if command_class_defined?(class_name)
           get_command_class(class_name)
         else
@@ -50,22 +52,6 @@ module Luban
 
       def define_command_class(class_name, base)
         self.class.send(:define_class, class_name, base: base, namespace: self.class)
-      end
-
-      def camelcase(str)
-        str = str.to_s.dup
-        str.gsub!(/(\:|\/)(.?)/){ "::#{$2.upcase}" }
-        str.gsub!(/(?:_+|-+)([a-z])/){ $1.upcase }
-        str.gsub!(/(\A|\s)([a-z])/){ $1 + $2.upcase }
-        str
-      end
-
-      def snakecase(str)
-        str.gsub(/::/, ':').
-        gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
-        gsub(/([a-z\d])([A-Z])/,'\1_\2').
-        tr("-", "_").
-        downcase
       end
     end
   end

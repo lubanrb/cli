@@ -261,7 +261,7 @@ module Luban
       end
 
       def add_parser_defaults
-        add_section("Defaults", options.values.map(&:default_str))
+        add_section("Defaults", options.values.map(&:default_str).reject { |d| d.empty? })
       end
 
       def add_parser_commands

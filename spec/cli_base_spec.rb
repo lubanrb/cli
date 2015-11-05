@@ -303,6 +303,19 @@ describe Luban::CLI::Base do
     cli.result[:args][:manager].must_equal nil
   end
 
+  it "" do
+    cli = create_cli_base(TestCLIBaseWithAction) do
+            option :project, "project name"
+            argument :manager, "project manager"
+            action!(:process_options)
+          end
+    argv = ["--project", "test project", "John Smith", "--", "--extra-arg", "test"]
+    cli.run(argv)
+    cli.result[:opts][:project].must_equal "test project"
+    cli.result[:args][:manager].must_equal "John Smith"
+    cli.result[:opts][:__remaining__].must_equal ["--extra-arg", "test"]
+  end
+
   it "validates required options" do
     cli = create_cli_base(TestCLIBaseWithAction) do
             option :project, "project name"

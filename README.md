@@ -98,9 +98,9 @@ my_app 1.0.0
 $ ruby my_app.rb john -p mr -s jr
 Hi, Mr. John Jr.!
 
-ruby examples/hi.rb john -p mr -s jr -V
-Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false}
-Arguments: {:name=>"chi"}
+ruby my_app.rb john -p mr -s jr -V
+Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false, :__remaining__=>[]}
+Arguments: {:name=>"john"}
 Hi, Mr. John Jr.!
 ```
 
@@ -385,6 +385,24 @@ MyApp.start do
   action :do_something_else
 end
 
+```
+
+## Option Parsing Termination
+
+It is a convention that a double hyphen is a signal to stop option interpretation and to read the remaining statements on the command line literally. Luban::CLI supports this convention and stores the remaining statements on the command line, if any, into the keyword argument :opts with a hash key :__remaining__, which is passed to the given action handler.
+
+The following refers to the simple example shown in the section Usage, which demonstrates the parsing result with remaining statements in option parsing termination.
+
+```ruby
+ruby my_app.rb john -p mr -s jr -V
+Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false, :__remaining__=>[]}
+Arguments: {:name=>"john"}
+Hi, Mr. John Jr.!
+
+ruby my_app.rb john -p mr -s jr -V -- --test here
+Options: {:version=>false, :prefix=>"mr", :suffix=>"jr", :verbose=>true, :help=>false, :__remaining__=>["--test", "here"]}
+Arguments: {:name=>"john"}
+Hi, Mr. John Jr.!
 ```
 
 ## Commands

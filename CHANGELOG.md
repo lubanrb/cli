@@ -1,5 +1,15 @@
 # Change log
 
+## Version 0.4.1 (Nov 05, 2015)
+
+Minor enhancements:
+  * After parsing, added any remaining command line arguments to opts[:__remaining__]
+    * This is useful to handle arguments provided after the double hyphen
+  * Used Ruby refinements to re-implement camelcase and snakecase handling
+
+Bug fixes:
+  * Filter empty default values for help message
+
 ## Version 0.4.0 (Oct 14, 2015)
 
 New features:

@@ -267,7 +267,7 @@ module Luban
       def add_parser_commands
         add_section("Commands") do |rows|
           commands.each_value do |cmd|
-            rows.concat(summarize(cmd.name, cmd.summary))
+            rows.concat(summarize(cmd.name, cmd.summary, summary_width, summary_width * 1.5))
           end
         end
       end

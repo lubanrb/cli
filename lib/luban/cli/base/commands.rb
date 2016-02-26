@@ -9,7 +9,12 @@ module Luban
       end
 
       def undef_command(cmd)
-        undef_singleton_method(@commands.delete(cmd.to_sym).action_method)
+        c = @commands.delete(cmd.to_sym)
+        if c.nil?
+          raise RuntimeError, "Command #{cmd.inspect} is NOT defined."
+        else
+          undef_singleton_method(c.action_method)
+        end
       end
 
       def use_commands(module_name, **opts, &blk)

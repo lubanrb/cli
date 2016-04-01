@@ -222,7 +222,7 @@ module Luban
         synopsis = ''
         @arguments.each_value do |arg|
           synopsis += arg.required? ? arg.display_name : "[#{arg.display_name}]"
-          synopsis += "[, #{arg.display_name}]*" if arg.multiple?
+          synopsis += "[ #{arg.display_name}]*" if arg.multiple?
           synopsis += ' '
         end
         synopsis

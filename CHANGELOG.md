@@ -1,5 +1,20 @@
 # Change log
 
+## Version 0.4.5 (Sept 07, 2016)
+
+Bug fixes:
+  * Left the default value for a switch to be nil if not set yet
+
+## Version 0.4.4 (Apr 18, 2016)
+
+Bug fixes:
+  * Removed comma for the synopsis of multiple arguments
+
+## Version 0.4.3 (Feb 26, 2016)
+
+Bug fixes:
+  * Ensured command is defined before it can be undefined
+
 ## Version 0.4.2 (Nov 05, 2015)
 
 Minor enhancements:

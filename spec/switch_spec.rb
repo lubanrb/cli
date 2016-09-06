@@ -22,7 +22,7 @@ describe Luban::CLI::Switch do
   it "ensures default switch status is set properly" do
     [[{default: true}, true], 
      [{default: false}, false],
-     [{}, false]].each do |config, expected|
+     [{}, nil]].each do |config, expected|
       create_switch(**config)[:default].must_equal expected 
     end
   end

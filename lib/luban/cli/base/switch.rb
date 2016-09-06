@@ -1,6 +1,10 @@
 module Luban
   module CLI
     class Switch < Option
+      def default_str
+        @default_str ||= build_default_str
+      end
+
       protected
 
       def init_config
@@ -9,8 +13,6 @@ module Luban
         @config[:type] = :bool
         # Ensure single value instead of multiple
         @config[:multiple] = false
-        # Ensure default switch state is set properly
-        @config[:default] = !!@config[:default]
       end
 
       def build_default_str

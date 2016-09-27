@@ -1,5 +1,10 @@
 # Change log
 
+## Version 0.4.6 (Sept 27, 2016)
+
+New features:
+  * Added a special command, task, that supports common task options
+
 ## Version 0.4.5 (Sept 07, 2016)
 
 Bug fixes:

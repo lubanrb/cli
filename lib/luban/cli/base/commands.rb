@@ -36,6 +36,17 @@ module Luban
         !@commands.empty?
       end
 
+      def task(cmd, **opts, &blk)
+        command(cmd, **opts, &blk).tap do |t|
+          add_common_task_options(t)
+          if !t.summary.nil? and t.description.empty?
+            t.long_desc "#{t.summary} in #{self.class.name}"
+          end
+        end
+      end
+
+      alias_method :undef_task, :undef_command
+
       protected
 
       def command_class(cmd, base)
@@ -57,6 +68,12 @@ module Luban
 
       def define_command_class(class_name, base)
         self.class.send(:define_class, class_name, base: base, namespace: self.class)
+      end
+
+      def add_common_task_options(task)
+        if @parent != self and @parent.respond_to?(__method__, true)
+          @parent.send(__method__, task)
+        end
       end
     end
   end

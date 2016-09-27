@@ -46,6 +46,27 @@ class TestCLIBaseWithCommands < TestCLIBaseWithAction
   end
 end
 
+class TestCLIBaseWithTasks < TestCLIBaseWithAction
+  configure do
+    command :tasks do
+      task :create do
+        desc "create project"
+        action :process_options
+      end
+
+      task :destroy do
+        desc "destroy project"
+        action :process_options
+      end
+    end
+  end
+
+  def add_common_task_options(task)
+    task.option :project, "project name"
+    task.argument :manager, "project manager"
+  end
+end
+
 def create_cli_base(klass = TestCLIBase, action_name = :run, **opts, &config_blk)
   klass.new(action_name, **opts, &config_blk)
 end
@@ -303,7 +324,7 @@ describe Luban::CLI::Base do
     cli.result[:args][:manager].must_equal nil
   end
 
-  it "" do
+  it "handles remaining arguments" do
     cli = create_cli_base(TestCLIBaseWithAction) do
             option :project, "project name"
             argument :manager, "project manager"
@@ -398,6 +419,20 @@ describe Luban::CLI::Base do
     cli = create_cli_base(TestCLIBaseWithCommands)
     cli.has_command?(:create).must_equal true
     cli.respond_to?(:__command_create).must_equal true
+  end
+
+  it "supports tasks" do
+    cli = create_cli_base(TestCLIBaseWithTasks)
+    cli.has_commands?.must_equal true
+    cli.list_commands.must_equal [:tasks]
+    tasks = cli.commands[:tasks]
+    tasks.list_commands.must_equal [:create, :destroy]
+    tasks.commands[:create].arguments.has_key?(:project)
+    tasks.commands[:create].arguments.has_key?(:manager)
+    tasks.commands[:destroy].arguments.has_key?(:project)
+    tasks.commands[:destroy].arguments.has_key?(:manager)
+    tasks.commands[:create].description.must_equal "#{tasks.commands[:create].summary} in #{tasks.class.name}"
+    tasks.commands[:destroy].description.must_equal "#{tasks.commands[:destroy].summary} in #{tasks.class.name}"
   end
 
   it "supports command injection" do

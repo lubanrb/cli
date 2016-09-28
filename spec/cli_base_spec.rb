@@ -61,6 +61,8 @@ class TestCLIBaseWithTasks < TestCLIBaseWithAction
     end
   end
 
+  protected
+
   def add_common_task_options(task)
     task.option :project, "project name"
     task.argument :manager, "project manager"

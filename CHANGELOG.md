@@ -1,5 +1,13 @@
 # Change log
 
+## Version 0.4.7 (Sept 28, 2016)
+
+Minor enhancements:
+  * Updated README with description for tasks
+
+Bug fixes:
+  * Properly handled any remaining command line arguments to opts[:__remaining__] when action method does not removes command line arguments destructively
+
 ## Version 0.4.6 (Sept 27, 2016)
 
 New features:

@@ -481,6 +481,64 @@ end
 
 DSL method #auto_help_command is used to define a command to list all commands or help for one command. Under rare circumstances that you need to customize the help command (i.e., use a different command name like :manual), you can use DSL method #help_command which accepts the same parameters that for #command. 
 
+### Tasks
+
+A task is a special command that supports common options shared among other tasks, and usually it is the last command in a command chain. 
+
+In a typical use case, all commands have a set of common options in addition to their own. Tasks can be defined to solve this issue in a DRY way with an instance method, #add_common_task_options, in where the common options are defined. Here is a simple example demonstrating the usage of tasks: 
+
+```ruby
+require 'luban/cli'
+
+class MyApp < Luban::CLI::Application
+  configure do
+    version '1.0.0'
+    desc 'Short description for the application'
+    long_desc 'Long description for the application'
+
+    command :tasks do
+      desc 'Description for tasks'
+
+      task :task1 do
+        desc 'Description for task 1'
+        argument :arg1, 'Description for arg1', type: :string
+        action :exec_tasks_task1
+      end
+
+      task :task2 do
+        desc 'Description for task 2'
+        option :opt1, 'Description for opt1', type: :integer
+        action :exec_tasks_task2
+      end
+    end
+  end
+
+  def exec_tasks_task1(**params)
+    puts params.inspect
+  end
+
+  def exec_tasks_task2(**params)
+    puts params.inspect
+  end
+
+  protected
+
+  def add_common_task_options(task)
+    task.switch :dry_run, "Run as a simulation", short: :d
+    task.switch :verbose, "Turn on verbose mode", short: :V
+  end
+end
+
+MyApp.start
+
+$ ruby my_app.rb tasks task1 arg1 -d -V
+{:args=>{:arg1=>"arg1"}, :opts=>{:help=>nil, :dry_run=>true, :verbose=>true, :__remaining__=>[]}}
+
+$ ruby my_app.rb tasks task2 -d
+{:args=>{}, :opts=>{:opt1=>nil, :help=>nil, :dry_run=>true, :verbose=>nil, :__remaining__=>[]}}
+
+```
+
 ### Command injection
 
 Commands can be defined directly within the Luban app class like examples shown in the previous sections. In addition, commands can be defined separately and injected into a given Luban app later. Command definition can be also namespaced by using module. With this feature, commands can be designed in a more re-usable and scalable way. This feature also implies that Luban CLI application supports namespaced commands.

@@ -1,5 +1,10 @@
 # Change log
 
+## Version 0.4.8 (Oct 19, 2016)
+
+Minor enhancements:
+  * Added convenient callback methods, #after_configure and #after_alter, in Luban::CLI::Base
+
 ## Version 0.4.7 (Sept 28, 2016)
 
 Minor enhancements:

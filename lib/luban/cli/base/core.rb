@@ -81,6 +81,7 @@ module Luban
       def alter(&blk)
         instance_eval(&blk)
         on_alter
+        after_alter
       end
 
       protected
@@ -105,10 +106,13 @@ module Luban
           instance_eval(&callback) unless callback.nil?
         end
         on_configure
+        after_configure
       end
 
       def on_configure; end 
+      def after_configure; end
       def on_alter; end
+      def after_alter; end
 
       def setup_default_action
         if has_commands?

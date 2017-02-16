@@ -1,5 +1,10 @@
 # Change log
 
+## Version 0.4.9 (Feb 16, 2017)
+
+Bug fixes:
+  * Checked if the resource file (rc_file) exists and is a regular file
+
 ## Version 0.4.8 (Oct 19, 2016)
 
 Minor enhancements:

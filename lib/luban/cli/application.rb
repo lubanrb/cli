@@ -24,7 +24,7 @@ module Luban
       end
 
       def rc_file_exists?
-        File.exists?(rc_path)
+        File.file?(rc_path)
       end
 
       def default_rc
